@@ -1,5 +1,8 @@
-import { NativeBaseProvider, extendTheme } from "native-base";
-import { Slot } from 'expo-router';
+import { NativeBaseProvider, extendTheme } from 'native-base';
+import {
+  SplashScreen,
+  Slot,
+} from 'expo-router';
 import {
   useFonts,
   Poppins_100Thin,
@@ -25,80 +28,128 @@ import {
 const fontConfig = {
   Poppins: {
     100: {
-      normal: "Thin",
-      italic: "Thin Italic",
+      normal: 'Thin',
+      italic: 'Thin Italic',
     },
     200: {
-      normal: "ExtraLight",
-      italic: "ExtraLight Italic",
+      normal: 'ExtraLight',
+      italic: 'ExtraLight Italic',
     },
     300: {
-      normal: "Light",
-      italic: "Light Italic",
+      normal: 'Light',
+      italic: 'Light Italic',
     },
     400: {
-      normal: "Regular",
-      italic: "Regular Italic",
+      normal: 'Regular',
+      italic: 'Regular Italic',
     },
     500: {
-      normal: "Medium",
-      italic: "Medium Italic",
+      normal: 'Medium',
+      italic: 'Medium Italic',
     },
     600: {
-      normal: "SemiBold",
-      italic: "SemiBold Italic",
+      normal: 'SemiBold',
+      italic: 'SemiBold Italic',
     },
     700: {
-      normal: "Bold",
-      italic: "Bold Italic",
+      normal: 'Bold',
+      italic: 'Bold Italic',
     },
     800: {
-      normal: "ExtraBold",
-      italic: "ExtraBold Italic",
+      normal: 'ExtraBold',
+      italic: 'ExtraBold Italic',
     },
     900: {
-      normal: "Black",
-      italic: "Black Italic",
-    }
+      normal: 'Black',
+      italic: 'Black Italic',
+    },
   },
 };
 
 // Make sure values below matches any of the keys in `fontConfig`
 const fonts = {
-  heading: "Poppins",
-  body: "Poppins",
-  mono: "Poppins",
+  heading: 'Poppins',
+  body: 'Poppins',
+  mono: 'Poppins',
+};
+
+const colors = {
+  // Add new color
+  primary: {
+    "50": "#9facff",
+    "100": "#7789ff",
+    "200": "#5067ff",
+    "300": "#2844ff",
+    "400": "#0023ff",
+    "500": "#0724e1",
+    "600": "#0c25c3",
+    "700": "#1125a8",
+    "800": "#13248e",
+    "900": "#152175",
+  },
+  greyText: {
+    "50": "#a2b1c4",
+    "100": "#8f9daf",
+    "200": "#7e8a98",
+    "300": "#71777d",
+    "400": "#5f6368",
+    "500": "#595857",
+    "600": "#514c47",
+    "700": "#484138",
+    "800": "#3e352a",
+    "900": "#332a1e",
+  },
+  greyBorder: {
+    "50": "#14c13712c",
+    "100": "#12a12111c",
+    "200": "#10c10a109",
+    "300": "#f1f2f2",
+    "400": "#d7d9da",
+    "500": "#ccc9c8",
+    "600": "#c3b9b4",
+    "700": "#bca89d",
+    "800": "#b79585",
+    "900": "#b5836a",
+  },
+};
+
+const components = {
+  Button: {
+    baseStyle: {
+      color: 'primary.400',
+    },
+  },
 };
 
 export default function AppLayout() {
-  let [fontsLoaded] = useFonts({
-    "Thin": Poppins_100Thin,
-    "Thin Italic": Poppins_100Thin_Italic,
-    "ExtraLight": Poppins_200ExtraLight,
-    "ExtraLight Italic": Poppins_200ExtraLight_Italic,
-    "Light": Poppins_300Light,
-    "Light Italic": Poppins_300Light_Italic,
-    "Regular": Poppins_400Regular,
-    "Regular Italic": Poppins_400Regular_Italic,
-    "Medium": Poppins_500Medium,
-    "Medium Italic": Poppins_500Medium_Italic,
-    "SemiBold": Poppins_600SemiBold,
-    "SemiBold Italic": Poppins_600SemiBold_Italic,
-    "Bold": Poppins_700Bold,
-    "Bold Italic": Poppins_700Bold_Italic,
-    "ExtraBold": Poppins_800ExtraBold,
-    "ExtraBold Italic": Poppins_800ExtraBold_Italic,
-    "Black": Poppins_900Black,
-    "Black Italic": Poppins_900Black_Italic,
+  const [fontsLoaded] = useFonts({
+    'Thin': Poppins_100Thin,
+    'Thin Italic': Poppins_100Thin_Italic,
+    'ExtraLight': Poppins_200ExtraLight,
+    'ExtraLight Italic': Poppins_200ExtraLight_Italic,
+    'Light': Poppins_300Light,
+    'Light Italic': Poppins_300Light_Italic,
+    'Regular': Poppins_400Regular,
+    'Regular Italic': Poppins_400Regular_Italic,
+    'Medium': Poppins_500Medium,
+    'Medium Italic': Poppins_500Medium_Italic,
+    'SemiBold': Poppins_600SemiBold,
+    'SemiBold Italic': Poppins_600SemiBold_Italic,
+    'Bold': Poppins_700Bold,
+    'Bold Italic': Poppins_700Bold_Italic,
+    'ExtraBold': Poppins_800ExtraBold,
+    'ExtraBold Italic': Poppins_800ExtraBold_Italic,
+    'Black': Poppins_900Black,
+    'Black Italic': Poppins_900Black_Italic,
   });
 
   if (!fontsLoaded) {
-    return null;
+    return <SplashScreen />;
   }
 
   const theme = extendTheme({
+    colors,
     fontConfig,
-  
     // Make sure values below matches any of the keys in `fontConfig`
     fonts,
   });
@@ -107,5 +158,5 @@ export default function AppLayout() {
     <NativeBaseProvider theme={theme}>
       <Slot />
     </NativeBaseProvider>
-  )
+  );
 }
