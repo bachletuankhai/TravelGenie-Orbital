@@ -130,12 +130,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
 
   const handleEmailChange = (mail) => {
+    // TODO: check email validity
     setEmail(mail);
   };
 
   const handlePasswordChange = (pass) => {
+    // TODO: check password validity
     setPassword(pass);
   };
+
+  // TODO: add link to sign up page
+
+  // TODO: add login handler
+
+  // TODO: add link to forget password page
 
   return (
     <Center w="100%">
