@@ -106,7 +106,7 @@ export default function List() {
 
   const onSkip = useCallback(() => {
     // TODO: skip to login page
-  });
+  }, []);
 
   return (
     <Center w="100%">
