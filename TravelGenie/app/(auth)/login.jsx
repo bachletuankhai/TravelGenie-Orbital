@@ -12,7 +12,7 @@ import {
   Icon,
   KeyboardAvoidingView,
 } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 
 function Header({ title }) {
@@ -115,7 +115,7 @@ function EyeIcon({ isShown, onPress }) {
     <Pressable onPress={onPress}>
       <Icon
         as={
-          <MaterialIcons name={isShown ? "visibility" : "visibility-off"} />
+          <Feather name={isShown ? "eye" : "eye-off"} />
         }
         size={6}
         mr="3"
