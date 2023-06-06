@@ -13,7 +13,6 @@ import {
   useState,
   useCallback,
   useRef,
-  useMemo,
 } from 'react';
 import { useWindowDimensions } from 'react-native';
 
@@ -108,7 +107,6 @@ export default function List() {
   );
 
   const handleNextPress = useCallback(() => {
-    console.log(currentSelectionIndex);
     if (currentSelectionIndex === data.length - 1) {
       // TODO: end of list, to page in design
     } else if (flatListRef.current) {
@@ -116,7 +114,6 @@ export default function List() {
       flatListRef.current.scrollToIndex({
         index: currentSelectionIndex + 1,
       });
-      setCurrentSelectionIndex(currentSelectionIndex + 1);
     }
   }, [currentSelectionIndex]);
 
