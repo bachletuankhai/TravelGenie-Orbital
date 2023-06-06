@@ -1,4 +1,5 @@
 import {
+  Image,
   FlatList,
   Center,
   Box,
@@ -12,37 +13,51 @@ import {
   useState,
   useCallback,
   useRef,
+  useMemo,
 } from 'react';
 import { useWindowDimensions } from 'react-native';
+
+const pathToImage = "../../assets/images/onboarding/";
 
 const data = [
   {
     id: 0,
     title: "Choose a City",
+    image: require(pathToImage + "Wagon.jpg"),
     content: "Travel the world view attraction " +
              "and experience the city like a local",
   },
   {
     id: 1,
     title: "What's nearby",
+    image: require(pathToImage + "Traveller.jpg"),
     content: "Finding out about the local attractions. Explore hidden places!",
   },
   {
     id: 2,
     title: "Travel planning",
+    image: require(pathToImage + "Booking.jpg"),
     content: "Explore destinations, save attraction " +
              "and thing to do, set up when and time",
   },
 ];
 
-function Onboarding({ title, content, width }) {
+function Onboarding({ image, title, content, width }) {
   return (
     <Box w={width} maxW="420">
       <VStack
-        mt='90%'
+        mt='10%'
         px="30px"
         space={6}
       >
+        <Image
+          source={image}
+          resizeMode='contain'
+          width={223}
+          height={280}
+          alt="Wagon"
+          alignSelf='center'
+        />
         <Text
           fontSize='3xl'
           color='black'
@@ -81,20 +96,27 @@ export default function List() {
 
   const renderItem = useCallback(
       ({ item }) => (
-        <Onboarding title={item.title} content={item.content} width={width}/>
+        <Onboarding
+          key={item.id}
+          image={item.image}
+          title={item.title}
+          content={item.content}
+          width={width}
+        />
       ),
       [width],
   );
 
   const handleNextPress = useCallback(() => {
+    console.log(currentSelectionIndex);
     if (currentSelectionIndex === data.length - 1) {
-      // end of list, to page in design
+      // TODO: end of list, to page in design
     } else if (flatListRef.current) {
       // Go to the next item
       flatListRef.current.scrollToIndex({
         index: currentSelectionIndex + 1,
       });
-      setCurrentSelectionIndex((index) => index + 1);
+      setCurrentSelectionIndex(currentSelectionIndex + 1);
     }
   }, [currentSelectionIndex]);
 
@@ -124,7 +146,8 @@ export default function List() {
           data={data}
           renderItem={renderItem}
           viewabilityConfig={{
-            itemVisiblePercentThreshold: 100,
+            minimumViewTime: 1,
+            itemVisiblePercentThreshold: 50,
           }}
           showsHorizontalScrollIndicator={false}
           onViewableItemsChanged={onScroll}
@@ -144,7 +167,7 @@ export default function List() {
             variant='solid'
             mt="10"
             size='lg'
-            h='63'
+            h='63px'
             borderRadius='2xl'
             bgColor='primary.400'
             _text={{
