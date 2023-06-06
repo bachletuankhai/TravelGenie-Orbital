@@ -137,14 +137,6 @@ const colors = {
   },
 };
 
-const components = {
-  Button: {
-    baseStyle: {
-      color: 'primary.400',
-    },
-  },
-};
-
 export default function AppLayout() {
   const [fontsLoaded] = useFonts({
     'Thin': Poppins_100Thin,

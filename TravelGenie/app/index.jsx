@@ -1,12 +1,29 @@
-/* eslint-disable object-curly-spacing */
-import { NativeBaseProvider, Text, Box } from 'native-base';
+import { useCallback, useState } from "react";
+import NavBar from "../components/NavBar";
+import {
+  Box,
+  Center,
+} from 'native-base';
 
-export default function App() {
+export default function HomePage() {
+  const [currentPage, setCurrentPage] = useState("Home");
+
+  const handleItemPress = useCallback((name) => {
+    if (name === currentPage) {
+      // TODO: Scroll to top or do sth here
+    } else {
+      setCurrentPage(name);
+    }
+  }, [currentPage]);
+
   return (
-    
-    <Box flex={1} bg="#fff" alignItems="center" justifyContent="center">
-      <Text>Open up index.js to start working on your app!</Text>
-    </Box>
-    
+    <Center>
+      <Box
+        flex={1} bg="white" safeArea
+        w="100%" maxW="420px" px="15px" alignItems='center'
+      >
+        <NavBar currentSelection={currentPage} onItemPressed={handleItemPress}/>
+      </Box>
+    </Center>
   );
 }
