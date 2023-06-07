@@ -144,7 +144,7 @@ export default function List() {
           renderItem={renderItem}
           viewabilityConfig={{
             minimumViewTime: 1,
-            itemVisiblePercentThreshold: 50,
+            itemVisiblePercentThreshold: 60,
           }}
           showsHorizontalScrollIndicator={false}
           onViewableItemsChanged={onScroll}
