@@ -1,3 +1,4 @@
+import { Booking, Wagon, Traveller } from '../../assets/images/onboarding';
 import {
   Image,
   FlatList,
@@ -16,26 +17,24 @@ import {
 } from 'react';
 import { useWindowDimensions } from 'react-native';
 
-const pathToImage = "../../assets/images/onboarding/";
-
 const data = [
   {
     id: 0,
     title: "Choose a City",
-    image: require(pathToImage + "Wagon.jpg"),
+    image: Wagon,
     content: "Travel the world view attraction " +
              "and experience the city like a local",
   },
   {
     id: 1,
     title: "What's nearby",
-    image: require(pathToImage + "Traveller.jpg"),
+    image: Traveller,
     content: "Finding out about the local attractions. Explore hidden places!",
   },
   {
     id: 2,
     title: "Travel planning",
-    image: require(pathToImage + "Booking.jpg"),
+    image: Booking,
     content: "Explore destinations, save attraction " +
              "and thing to do, set up when and time",
   },

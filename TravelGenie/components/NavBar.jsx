@@ -1,8 +1,10 @@
-import BookmarkIcon from "./icons/navbar/BookmarkIcon";
-import HomeIcon from "./icons/navbar/HomeIcon";
-import LocationIcon from "./icons/navbar/LocationIcon";
-import MapIcon from "./icons/navbar/MapIcon";
-import ProfileIcon from "./icons/navbar/ProfileIcon";
+import {
+  BookmarkIcon,
+  LocationIcon,
+  HomeIcon,
+  MapIcon,
+  ProfileIcon,
+} from './icons/navbar';
 import {
   Center,
   HStack,
