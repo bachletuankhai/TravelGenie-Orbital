@@ -15,6 +15,7 @@ export async function handleLogin(email, password) {
           },
         },
     );
+    console.log(`handleLogin Error: ${res.data.error}`);
     return res.data;
   } catch (error) {
     console.log(`handleLogin error: ${error}`);

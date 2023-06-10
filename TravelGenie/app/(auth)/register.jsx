@@ -9,14 +9,19 @@ import {
   Text,
   Box,
   ScrollView,
-  Pressable,
   Icon,
   KeyboardAvoidingView,
+  IconButton,
 } from 'native-base';
 import { Feather } from '@expo/vector-icons';
 import { useContext, useState } from 'react';
 import { Link } from 'expo-router';
-import { AuthContext } from '../../contexts/auth';
+import {
+  AuthContext,
+  checkEmail,
+  checkPassword,
+  loginAlert,
+} from '../../contexts/auth';
 
 function Header({ title }) {
   return (
@@ -30,9 +35,9 @@ function Header({ title }) {
   );
 }
 
-function Email({ value, onChangeText }) {
+function Email({ value, onChangeText, showHelper }) {
   return (
-    <FormControl>
+    <FormControl isInvalid={showHelper}>
       <FormControl.Label
         left='2'
         _text={{
@@ -56,18 +61,29 @@ function Email({ value, onChangeText }) {
         _focus={{
           borderColor: 'greyText.300',
           bgColor: 'white',
+          _invalid: {
+            borderColor: 'greyText.300',
+            bgColor: 'white',
+          },
+        }}
+        _invalid={{
+          borderColor: 'greyText.300',
+          bgColor: 'white',
         }}
         placeholder='user@example.com'
       />
+      <FormControl.ErrorMessage left='2'>
+        Invalid email address.
+      </FormControl.ErrorMessage>
     </FormControl>
   );
 }
 
-function Password({ value, onChangeText, isShown, setShow }) {
+function Password({ value, onChangeText, isShown, setShow, showHelper }) {
   const show = isShown;
 
   return (
-    <FormControl>
+    <FormControl isInvalid={showHelper}>
       <FormControl.Label
         left='2'
         _text={{
@@ -92,21 +108,33 @@ function Password({ value, onChangeText, isShown, setShow }) {
         _focus={{
           borderColor: 'greyText.300',
           bgColor: 'white',
+          _invalid: {
+            borderColor: 'greyText.300',
+            bgColor: 'white',
+          },
+        }}
+        _invalid={{
+          borderColor: 'greyText.300',
+          bgColor: 'white',
         }}
         placeholder='Required'
         InputRightElement={
           <EyeIcon isShown={show} onPress={setShow}/>
         }
       />
+      <FormControl.ErrorMessage left='2'>
+        Password must have minimum length of 8.
+      </FormControl.ErrorMessage>
     </FormControl>
   );
 }
 
-function ConfirmPassword({ value, onChangeText, isShown, setShow }) {
+function ConfirmPassword({ value, onChangeText,
+  isShown, setShow, showHelper }) {
   const show = isShown;
 
   return (
-    <FormControl>
+    <FormControl isInvalid={showHelper}>
       <FormControl.Label
         left='2'
         _text={{
@@ -131,28 +159,45 @@ function ConfirmPassword({ value, onChangeText, isShown, setShow }) {
         _focus={{
           borderColor: 'greyText.300',
           bgColor: 'white',
+          _invalid: {
+            borderColor: 'greyText.300',
+            bgColor: 'white',
+          },
+        }}
+        _invalid={{
+          borderColor: 'greyText.300',
+          bgColor: 'white',
         }}
         placeholder='Required'
         InputRightElement={
           <EyeIcon isShown={show} onPress={setShow}/>
         }
       />
+      <FormControl.ErrorMessage left='2'>
+        The passwords you entered do not match.
+      </FormControl.ErrorMessage>
     </FormControl>
   );
 }
 
 function EyeIcon({ isShown, onPress }) {
   return (
-    <Pressable onPress={onPress}>
-      <Icon
-        as={
-          <Feather name={isShown ? "eye" : "eye-off"} />
-        }
-        size={6}
-        mr="3"
-        color="muted.400"
-      />
-    </Pressable>
+    <IconButton
+      variant='unstyled'
+      alignItems='center'
+      borderRadius='full'
+      onPress={onPress}
+      icon={
+        <Icon
+          as={
+            <Feather name={isShown ? "eye" : "eye-off"} />
+          }
+          size={6}
+          mr="2"
+          color="muted.400"
+        />
+      }
+    />
   );
 }
 
@@ -162,33 +207,53 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isValidEmail, setIsValidEmail] = useState(false);
+  const [showHelperEmail, setShowHelperEmail] = useState(false);
+  const [isValidPassword, setIsValidPassword] = useState(false);
+  const [showHelperPassword, setShowHelperPassword] = useState(false);
+  const [isValidCfPassword, setIsValidCfPassword] = useState(false);
+  const [showHelperCfPassword, setShowHelperCfPassword] = useState(false);
+  const submitDisabled = !isValidEmail ||
+    !isValidPassword || !isValidCfPassword;
 
   const { register } = useContext(AuthContext);
 
 
   const handleEmailChange = (mail) => {
-    // TODO: check email validity
+    const isValid = checkEmail(mail);
+    setIsValidEmail(isValid);
+    setShowHelperEmail(!isValid); // if email is not valid, show helper
     setEmail(mail);
   };
 
   const handlePasswordChange = (pass) => {
-    // TODO: check password validity
+    const isValid = checkPassword(pass);
+    setIsValidPassword(isValid);
+    setShowHelperPassword(!isValid); // if password not valid, show helper
     setPassword(pass);
   };
 
   const handleCfPasswordChange = (pass) => {
-    // TODO: check password validity
+    const isValid = pass === password;
+    setIsValidCfPassword(isValid);
+    setShowHelperCfPassword(!isValid); // if cf password not valid, show helper
     setConfirmPassword(pass);
   };
 
-  // TODO: add signup handler
-  const signUpHandler = () => {
+  const signUpHandler = async () => {
     setIsLoading(true);
-    const { user, error } = register(email, password);
-    setIsLoading(false);
+    console.log(`Password: ${password}`);
+    if (!checkEmail(email) || !checkPassword(password)) {
+      setIsLoading(false);
+      loginAlert("Invalid email and/or password.");
+    } else {
+      const { error } = await register(email, password);
+      setIsLoading(false);
+      if (error) {
+        loginAlert(error);
+      }
+    }
   };
-
-  // TODO: add link to login page
 
   return (
     <Center w="100%">
@@ -204,21 +269,28 @@ export default function RegisterPage() {
             <Header title="Sign up"/>
 
             <VStack space={3} mt="5" px="30px">
-              <Email value={email} onChangeText={handleEmailChange} />
+              <Email
+                value={email}
+                onChangeText={handleEmailChange}
+                showHelper={showHelperEmail}
+              />
               <Password
                 value={password}
                 onChangeText={handlePasswordChange}
                 isShown={showPassword}
                 setShow={() => setShowPassword(!showPassword)}
+                showHelper={showHelperPassword}
               />
               <ConfirmPassword
                 value={confirmPassword}
                 onChangeText={handleCfPasswordChange}
                 isShown={showPassword}
                 setShow={() => setShowPassword(!showPassword)}
+                showHelper={showHelperCfPassword}
               />
               <Button
                 isLoading={isLoading}
+                isDisabled={submitDisabled}
                 isLoadingText='Sign up'
                 onPress={signUpHandler}
                 variant='solid'
@@ -231,6 +303,9 @@ export default function RegisterPage() {
                   color: 'white',
                   fontSize: 'sm',
                   fontWeight: '400',
+                }}
+                _pressed={{
+                  bgColor: 'primary.600',
                 }}
               >
                 Sign up

@@ -14,7 +14,11 @@ import {
 } from 'native-base';
 import { Feather } from '@expo/vector-icons';
 import { useContext, useState } from 'react';
-import { AuthContext } from '../../contexts/auth';
+import {
+  AuthContext,
+  checkEmail,
+  loginAlert,
+} from '../../contexts/auth';
 import { useRouter } from 'expo-router';
 
 function Header({ title }) {
@@ -132,16 +136,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useContext(AuthContext);
+  const [isValidEmail, setIsValidEmail] = useState(false);
+  const [isValidPassword, setIsValidPassword] = useState(false);
+  const isDisabled = !isValidEmail || !isValidPassword;
+
   const router = useRouter();
 
-
   const handleEmailChange = (mail) => {
-    // TODO: check email validity
+    setIsValidEmail(checkEmail(mail));
     setEmail(mail);
   };
 
   const handlePasswordChange = (pass) => {
-    // TODO: check password validity
+    setIsValidPassword(pass.length > 0);
     setPassword(pass);
   };
 
@@ -149,11 +156,18 @@ export default function LoginPage() {
     router.push("/register");
   };
 
-  const handleLogin = () => {
-    // TODO: add login handler
+  const handleLogin = async () => {
     setIsLoading(true);
-    const { data, error } = login(email, password);
-    setIsLoading(false);
+    if (!checkEmail(email)) {
+      setIsLoading(false);
+      loginAlert("Incorrect email and/or password.");
+    } else {
+      const { error } = await login(email, password);
+      setIsLoading(false);
+      if (error) {
+        loginAlert(error);
+      }
+    }
   };
 
   // TODO: add link to forget password page
@@ -175,6 +189,7 @@ export default function LoginPage() {
               <Email value={email} onChangeText={handleEmailChange} />
               <Password value={password} onChangeText={handlePasswordChange} />
               <Button
+                isDisabled={isDisabled}
                 isLoading={isLoading}
                 isLoadingText='Logging in'
                 onPress={handleLogin}
@@ -183,11 +198,14 @@ export default function LoginPage() {
                 size='lg'
                 h='63'
                 borderRadius='2xl'
-                bgColor='primary.400'
+                bg='primary.400'
                 _text={{
                   color: 'white',
                   fontSize: 'sm',
                   fontWeight: '400',
+                }}
+                _pressed={{
+                  bgColor: 'primary.600',
                 }}
               >
                 Log in
