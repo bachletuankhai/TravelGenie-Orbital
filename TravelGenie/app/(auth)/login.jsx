@@ -13,7 +13,9 @@ import {
   KeyboardAvoidingView,
 } from 'native-base';
 import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { AuthContext } from '../../contexts/auth';
+import { useRouter } from 'expo-router';
 
 function Header({ title }) {
   return (
@@ -128,6 +130,10 @@ function EyeIcon({ isShown, onPress }) {
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useContext(AuthContext);
+  const router = useRouter();
+
 
   const handleEmailChange = (mail) => {
     // TODO: check email validity
@@ -139,9 +145,16 @@ export default function LoginPage() {
     setPassword(pass);
   };
 
-  // TODO: add link to sign up page
+  const toSignup = () => {
+    router.push("/register");
+  };
 
-  // TODO: add login handler
+  const handleLogin = () => {
+    // TODO: add login handler
+    setIsLoading(true);
+    const { data, error } = login(email, password);
+    setIsLoading(false);
+  };
 
   // TODO: add link to forget password page
 
@@ -162,6 +175,9 @@ export default function LoginPage() {
               <Email value={email} onChangeText={handleEmailChange} />
               <Password value={password} onChangeText={handlePasswordChange} />
               <Button
+                isLoading={isLoading}
+                isLoadingText='Logging in'
+                onPress={handleLogin}
                 variant='solid'
                 mt="12"
                 size='lg'
@@ -195,6 +211,7 @@ export default function LoginPage() {
                 Don&apos;t have an account?
               </Text>
               <Button
+                onPress={toSignup}
                 variant='outline'
                 size='lg'
                 h='63'

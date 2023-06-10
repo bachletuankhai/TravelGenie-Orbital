@@ -24,6 +24,7 @@ import {
   Poppins_900Black,
   Poppins_900Black_Italic,
 } from '@expo-google-fonts/poppins';
+import { AuthProvider } from '../contexts/auth';
 
 const fontConfig = {
   Poppins: {
@@ -171,8 +172,10 @@ export default function AppLayout() {
   });
 
   return (
-    <NativeBaseProvider theme={theme}>
-      <Slot />
-    </NativeBaseProvider>
+    <AuthProvider>
+      <NativeBaseProvider theme={theme}>
+        <Slot />
+      </NativeBaseProvider>
+    </AuthProvider>
   );
 }

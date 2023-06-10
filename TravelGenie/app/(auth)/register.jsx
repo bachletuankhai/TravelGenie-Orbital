@@ -14,7 +14,9 @@ import {
   KeyboardAvoidingView,
 } from 'native-base';
 import { Feather } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { Link } from 'expo-router';
+import { AuthContext } from '../../contexts/auth';
 
 function Header({ title }) {
   return (
@@ -154,11 +156,15 @@ function EyeIcon({ isShown, onPress }) {
   );
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { register } = useContext(AuthContext);
+
 
   const handleEmailChange = (mail) => {
     // TODO: check email validity
@@ -176,6 +182,11 @@ export default function LoginPage() {
   };
 
   // TODO: add signup handler
+  const signUpHandler = () => {
+    setIsLoading(true);
+    const { user, error } = register(email, password);
+    setIsLoading(false);
+  };
 
   // TODO: add link to login page
 
@@ -207,6 +218,9 @@ export default function LoginPage() {
                 setShow={() => setShowPassword(!showPassword)}
               />
               <Button
+                isLoading={isLoading}
+                isLoadingText='Sign up'
+                onPress={signUpHandler}
                 variant='solid'
                 mt="100px"
                 size='lg'
@@ -239,14 +253,16 @@ export default function LoginPage() {
                 >
                   Already have an account?{" "}
                 </Text>
-                <Text
-                  fontSize='md'
-                  fontWeight='700'
-                  color='greyText.400'
-                  underline
-                >
-                  Log in
-                </Text>
+                <Link href={"/login"}>
+                  <Text
+                    fontSize='md'
+                    fontWeight='700'
+                    color='greyText.400'
+                    underline
+                  >
+                    Log in
+                  </Text>
+                </Link>
               </HStack>
             </VStack>
           </ScrollView>
