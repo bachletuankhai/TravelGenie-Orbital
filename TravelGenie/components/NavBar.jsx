@@ -45,7 +45,7 @@ function NavBarButton({ page, isSelected, size, onItemPressed }) {
   const color = isSelected ? iconColors.dark : iconColors.unselected;
 
   const handleItemPress = useCallback(() => {
-    onItemPressed(page.name);
+    onItemPressed(page.id);
   }, [page, onItemPressed]);
 
   return (
@@ -64,7 +64,7 @@ export default function NavBar({ currentSelection, onItemPressed }) {
         <NavBarButton
           page={page}
           key={page.id}
-          isSelected={page.name === currentSelection}
+          isSelected={page.id === currentSelection}
           size='xl'
           onItemPressed={onItemPressed}
         />
