@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import NavBar from "../components/NavBar";
+import NavBar from "../../components/NavBar";
 import {
   Box,
   Center,

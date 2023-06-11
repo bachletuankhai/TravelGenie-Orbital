@@ -5,7 +5,8 @@ export default function MicrophoneIcon() {
   return (
     <Icon
       as={<MaterialCommunityIcons name="microphone" />}
-      size={5}
-      color="primary.400" />
+      size={6}
+      color="primary.400"
+    />
   );
 }

@@ -49,7 +49,7 @@ function NavBarButton({ page, isSelected, size, onItemPressed }) {
   }, [page, onItemPressed]);
 
   return (
-    <Pressable cursor="pointer" flex={1} onPress={handleItemPress} py='3'>
+    <Pressable flex={1} onPress={handleItemPress} pt='7' pb='2'>
       <Center>
         <page.icon size={size} color={color} />
       </Center>
@@ -59,7 +59,7 @@ function NavBarButton({ page, isSelected, size, onItemPressed }) {
 
 export default function NavBar({ currentSelection, onItemPressed }) {
   return (
-    <HStack alignItems='center' justifyContent='space-around'>
+    <HStack safeAreaBottom alignItems='center' px='2'>
       {pages.map((page) => (
         <NavBarButton
           page={page}
