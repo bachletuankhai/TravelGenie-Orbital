@@ -6,7 +6,7 @@ export const FirstLaunchContext = createContext({});
 // show onboarding screens on first launch only
 export function FirstLaunchProvider({ children }) {
   const [firstLaunch, setFirstLaunch] = useState(true);
-  const [doneOnboarding, setDoneOnboarding] = useState(false);
+  const [doneOnboarding, setDoneOnboarding] = useState(true);
 
   const getHistory = useCallback(async () => {
     // uncomment this line to reset appLaunched key
