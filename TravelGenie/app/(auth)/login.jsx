@@ -173,7 +173,7 @@ export default function LoginPage() {
   // TODO: add link to forget password page
 
   return (
-    <Center w="100%">
+    <Center w="100%" bgColor='white'>
       <Box safeArea w="100%" maxW='420'>
         <KeyboardAvoidingView behavior='padding'>
           <ScrollView w="100%" h="100%"

@@ -1,23 +1,36 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { handleLogin, handleRegister } from '../lib/connectBackend';
 import { Alert } from 'react-native';
+import { FirstLaunchContext } from './firstLaunch';
 
 export const AuthContext = createContext({});
 
 function useProtectedRoute(user) {
   const segments = useSegments();
   const router = useRouter();
+  const { doneOnboarding } = useContext(FirstLaunchContext);
 
   useEffect(() => {
+    // console.log("useProtectedRoute useEffect called");
     const inAuthGroup = segments[0] === "(auth)";
-    if (!user && !inAuthGroup) {
-      router.replace("/login");
+    const inOnboardingGroup = segments[0] === "(onboarding)";
+    if (inOnboardingGroup) {
+      // if in onboarding group and finished onboarding, redirect to login page
+      if (doneOnboarding) {
+        router.replace('/login');
+      }
+    } else if (!doneOnboarding) {
+      // if not in onboarding group and not done onboarding,
+      // redirect to onboarding page
+      router.replace('/onboarding');
+    } else if (!user && !inAuthGroup) {
+      router.replace('/login');
     } else if (user && inAuthGroup) {
-      router.replace("/");
+      router.replace('/');
     }
-  }, [user, segments, router]);
+  }, [user, segments, router, doneOnboarding]);
 }
 
 export function checkEmail(email) {
