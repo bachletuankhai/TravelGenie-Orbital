@@ -51,8 +51,8 @@ router.post("/login", async (req, res) => {
   try {
     await conn.connect();
     console.log(`Logging in:`);
-    console.log(` Email: ${email}`);
-    console.log(` Password: ${password}`);
+    // console.log(` Email: ${email}`);
+    // console.log(` Password: ${password}`);
 
     const [results, fields] = await conn.execute(
         'SELECT * FROM users WHERE email = ?',
@@ -80,6 +80,7 @@ router.post("/login", async (req, res) => {
     return res.status(401).json({error: msg});
   } finally {
     await conn.end();
+    console.log('Disconnected from database');
   }
 })
 
