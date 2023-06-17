@@ -20,7 +20,13 @@ module.exports = {
     'react-hooks',
   ],
   'rules': {
-    'object-curly-spacing': ['never', { "objectsInObjects": false }],
+    'no-unused-vars': 'warn',
+    'quotes': 'off',
+    'require-jsdoc': 'off',
+    'camelcase': ['off',
+      { 'ignoreDestructuring': true, 'ignoreImports': true }],
+    'linebreak-style': 'off',
+    'object-curly-spacing': ['warn', 'always', { 'objectsInObjects': false }],
     'react/prop-types': 'off',
     'react/react-in-jsx-scope': 'off',
     'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
