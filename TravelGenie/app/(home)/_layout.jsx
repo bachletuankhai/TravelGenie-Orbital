@@ -1,5 +1,4 @@
-import { Stack, useRouter } from "expo-router";
-import NavBar from "../../components/NavBar";
+import { Stack, Tabs, useRouter } from "expo-router";
 import { useState, useCallback } from "react";
 import {
   BookmarkIcon,
@@ -8,6 +7,7 @@ import {
   MapIcon,
   ProfileIcon,
 } from '../../components/icons/navbar';
+import { iconColors } from "../../assets/colors/iconColors";
 
 const pages = [
   {
@@ -68,21 +68,75 @@ export default function HomeLayout() {
     }
   }, [currentPageID, router]);
 
-
+  // return (
+  //   <>
+  //     <Stack
+  //       screenOptions={{
+  //         animationDuration: 100,
+  //         animation: "slide_from_right",
+  //         animationTypeForReplace: animationType,
+  //         headerShown: false,
+  //         gestureEnabled: false,
+  //       }}
+  //     />
+  //   </>
+  // );
   return (
-    <>
-      <Stack
-        screenOptions={{
-          animation: "slide_from_right",
-          animationTypeForReplace: animationType,
-          headerShown: false,
-          gestureEnabled: false,
+    <Tabs screenOptions={{
+      tabBarShowLabel: false,
+      headerShown: false,
+      tabBarStyle: {
+        borderTopWidth: 1, // TODO: delete this line when front end done
+        height: 90,
+        position: 'absolute',
+      },
+      tabBarItemStyle: {
+      },
+      tabBarActiveTintColor: iconColors.dark,
+      tabBarInactiveTintColor: iconColors.unselected,
+    }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          tabBarIcon: HomeIcon,
         }}
       />
-      <NavBar
-        currentSelection={currentPageID}
-        onItemPressed={handleItemPress}
+      <Tabs.Screen
+        name="discover"
+        options={{
+          href: null,
+        }}
       />
-    </>
+      <Tabs.Screen
+        name="initerary/index"
+        options={{
+          tabBarIcon: MapIcon,
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          tabBarIcon: LocationIcon,
+        }}
+      />
+      <Tabs.Screen
+        name="favorite"
+        options={{
+          tabBarIcon: BookmarkIcon,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ProfileIcon,
+        }}
+      />
+      <Tabs.Screen
+        name="initerary/[id]"
+        options={{
+          href: null,
+        }}
+      />
+    </Tabs>
   );
 }

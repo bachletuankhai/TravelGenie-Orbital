@@ -19,7 +19,9 @@ const Microphone = ({ onPress }) => {
   );
 };
 
-const SearchBar = ({ value, onChangeText, onVoice, enableVoice=false }) => {
+const SearchBar = (
+    { value, onChangeText, onVoice, enableVoice=false, ...props },
+) => {
   return (
     <Input
       bg='white'
@@ -39,6 +41,7 @@ const SearchBar = ({ value, onChangeText, onVoice, enableVoice=false }) => {
       placeholder='Search'
       InputLeftElement={<SearchIcon size={'xl'} color='black' />}
       InputRightElement={enableVoice && <Microphone onPress={onVoice} />}
+      {...props}
     />
   );
 };
