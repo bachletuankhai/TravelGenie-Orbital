@@ -4,7 +4,7 @@ import {
 } from "native-base";
 
 export default function InputWithLabel({
-  value, onChangeText, label, placeholder, _label, _input, type, isReadOnly
+  value, onChangeText, label, placeholder, _label, _input, type, isReadOnly,
 }) {
   return (
     <FormControl>

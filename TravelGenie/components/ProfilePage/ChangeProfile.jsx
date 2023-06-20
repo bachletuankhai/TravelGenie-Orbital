@@ -15,7 +15,7 @@ import { useAuthContext } from '../../contexts/auth';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CameraIcon, RevertIcon } from '../../assets/icons/profilepage';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { DefaultProfile } from '../../assets/images/profile';
 import * as ImagePicker from 'expo-image-picker';
 import BlueButton from '../BlueButton';

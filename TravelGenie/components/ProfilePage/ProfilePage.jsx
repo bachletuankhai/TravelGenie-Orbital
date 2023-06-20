@@ -88,7 +88,7 @@ const sections = [
     type: "Button",
     title: "Setting",
     iconLeft: SettingIcon,
-    href: null,
+    href: '/profile/setting',
   },
   {
     id: 4,
