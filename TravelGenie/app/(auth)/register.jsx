@@ -230,6 +230,9 @@ export default function RegisterPage() {
     const isValid = checkPassword(pass);
     setIsValidPassword(isValid);
     setShowHelperPassword(!isValid); // if password not valid, show helper
+    const isValidCf = pass === confirmPassword;
+    setIsValidCfPassword(isValidCf);
+    setShowHelperCfPassword(!isValidCf);
     setPassword(pass);
   };
 
