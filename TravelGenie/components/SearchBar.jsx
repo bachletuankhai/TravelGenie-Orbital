@@ -5,7 +5,7 @@ import {
 import {
   SearchIcon,
   MicrophoneIcon,
-} from './icons/searchbar';
+} from '../assets/icons/searchbar';
 
 const Microphone = ({ onPress }) => {
   return (

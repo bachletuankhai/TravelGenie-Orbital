@@ -12,10 +12,10 @@ import {
 import {
   LocationIcon,
   NotificationIcon,
-} from "../icons/homepage";
+} from "../../assets/icons/homepage";
 import { categories } from "../../lib/categories";
 import SearchBar from '../SearchBar';
-import { MapIcon } from '../icons/navbar';
+import { MapIcon } from '../../assets/icons/navbar';
 import { Link } from 'expo-router';
 
 function Category({ item }) {

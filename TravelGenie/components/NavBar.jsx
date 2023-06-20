@@ -4,7 +4,7 @@ import {
   HomeIcon,
   MapIcon,
   ProfileIcon,
-} from './icons/navbar';
+} from '../assets/icons/navbar';
 import {
   HStack,
   IconButton,

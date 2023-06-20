@@ -6,7 +6,7 @@ import {
 } from 'native-base';
 import { ImageBackground, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import BookmarkIcon from '../icons/discoverItem/BookmarkIcon';
+import BookmarkIcon from '../../assets/icons/discoverItem/BookmarkIcon';
 import { categories } from '../../lib/categories';
 
 function BookmarkButton() {

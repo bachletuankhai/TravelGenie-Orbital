@@ -4,7 +4,7 @@ import {
   LandmarkIcon,
   ShopIcon,
   BikeIcon,
-} from '../components/icons/categories';
+} from '../assets/icons/categories';
 
 export const categories = [
   {

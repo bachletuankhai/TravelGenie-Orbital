@@ -12,7 +12,7 @@ import {
 import { View, Animated } from 'react-native';
 import DiscoverItemCard from './DiscoverItemCard';
 import Searchbar from '../SearchBar';
-import { FilterIcon } from '../icons/searchbar';
+import { FilterIcon } from '../../assets/icons/searchbar';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRef } from 'react';
 import {
