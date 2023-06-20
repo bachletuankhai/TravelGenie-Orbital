@@ -6,7 +6,7 @@ import {
   HomeIcon,
   MapIcon,
   ProfileIcon,
-} from '../../components/icons/navbar';
+} from '../../assets/icons/navbar';
 import { iconColors } from "../../assets/colors/iconColors";
 
 const pages = [

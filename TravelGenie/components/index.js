@@ -7,3 +7,5 @@ export { default as FavoritePage } from './FavoritePage/FavoritePage';
 export { default as HomePage } from './HomePage/HomePage';
 export { default as IniteraryPage } from './IniteraryPage/IniteraryPage';
 export { default as MapPage } from './MapPage/MapPage';
+export { default as BlueButton } from './BlueButton';
+export { default as ShadeButton } from './ProfilePage/ShadeButton';
