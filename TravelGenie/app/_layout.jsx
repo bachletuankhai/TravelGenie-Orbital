@@ -177,7 +177,11 @@ export default function AppLayout() {
     <FirstLaunchProvider>
       <AuthProvider>
         <NativeBaseProvider theme={theme}>
-          <Slot />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          />
         </NativeBaseProvider>
       </AuthProvider>
     </FirstLaunchProvider>
