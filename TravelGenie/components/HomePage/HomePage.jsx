@@ -16,7 +16,7 @@ import {
 import { categories } from "../../lib/categories";
 import SearchBar from '../SearchBar';
 import { MapIcon } from '../../assets/icons/navbar';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 function Category({ item }) {
   const opacity = item.isShown ? 1 : 0.6;
@@ -57,6 +57,8 @@ function Categories() {
 }
 
 function StartButton() {
+  const router = useRouter();
+
   return (
     <Button
       variant='solid'
@@ -74,6 +76,9 @@ function StartButton() {
         bgColor: 'primary.600',
       }}
       leftIcon={<MapIcon size='xl' color='#ffffff' />}
+      onPress={() => {
+        router.push('/newtrip');
+      }}
     >
       START YOUR ITINERARY
     </Button>
