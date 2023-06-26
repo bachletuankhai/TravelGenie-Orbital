@@ -110,7 +110,6 @@ export default function List() {
 
   const handleNextPress = useCallback(async () => {
     if (currentSelectionIndex === data.length - 1) {
-      // TODO: end of list, to page in design
       await onDoneOnboarding();
     } else if (flatListRef.current) {
       // Go to the next item
@@ -127,7 +126,6 @@ export default function List() {
   }, []);
 
   const onSkip = useCallback(async () => {
-    // TODO: skip to login page
     await onDoneOnboarding();
   }, [onDoneOnboarding]);
 

@@ -245,7 +245,6 @@ export default function RegisterPage() {
 
   const signUpHandler = async () => {
     setIsLoading(true);
-    console.log(`Password: ${password}`);
     if (!checkEmail(email) || !checkPassword(password)) {
       setIsLoading(false);
       loginAlert("Invalid email and/or password.");
