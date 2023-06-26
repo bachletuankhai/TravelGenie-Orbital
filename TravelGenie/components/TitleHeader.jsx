@@ -1,14 +1,21 @@
+import { useRouter } from 'expo-router';
 import {
   HStack,
   IconButton,
   ArrowBackIcon,
   Text,
 } from 'native-base';
+import { useCallback } from 'react';
 import { View } from 'react-native';
 
 export default function Title({
-  title, onBackPress, _title, _style,
+  title, onBackPress, _title, _style, showBackButton=true,
 }) {
+  const router = useRouter();
+
+  const defaultBack = useCallback(() => {
+    router.back();
+  }, [router]);
   return (
     <HStack
       w='100%' h='50px'
@@ -16,7 +23,7 @@ export default function Title({
       alignItems='center'
       {..._style}
     >
-      <IconButton
+      {showBackButton && <IconButton
         size='md'
         position='absolute'
         left='4'
@@ -27,8 +34,8 @@ export default function Title({
           bg: 'coolGray.200',
         }}
         icon={<ArrowBackIcon color='#593131' />}
-        onPress={onBackPress}
-      />
+        onPress={onBackPress || defaultBack}
+      />}
       <View pointerEvents='none'>
         <Text
           color='black'
