@@ -19,6 +19,9 @@ import { Feather } from '@expo/vector-icons';
 import { DefaultProfile } from '../../assets/images/profile';
 import * as ImagePicker from 'expo-image-picker';
 import BlueButton from '../BlueButton';
+import { checkEmail } from '../../contexts/auth';
+import { changeProfile } from '../../lib/connectBackend';
+import { Alert } from 'react-native';
 
 function EditButton({ mode, ...props }) {
   if (mode == "edit") {
@@ -156,7 +159,7 @@ function Avatar({ src, onCameraPress }) {
         h='171px'
         w='171px'
         borderRadius='full'
-        resizeMode='stretch'
+        resizeMode='cover'
       />
       <CameraButton
         onPress={onCameraPress}
@@ -173,10 +176,11 @@ function Avatar({ src, onCameraPress }) {
 
 const ChangeProfilePage = () => {
   // handle form content
-  const { user } = useAuthContext();
-  const orginalName = user.name || '';
-  const [email, setEmail] = useState(user.email);
+  const { user, updateUser } = useAuthContext();
+  const orginalName = user?.name || '';
+  const [email, setEmail] = useState(user?.email);
   const [name, setName] = useState(orginalName);
+  const [showNameHelper, setShowNameHelper] = useState(false);
 
   const router = useRouter();
 
@@ -186,6 +190,8 @@ const ChangeProfilePage = () => {
 
   const handleNameChange = useCallback((text) => {
     setName(text);
+    const isValidName = text.length > 0;
+    setShowNameHelper(!isValidName);
   }, []);
 
   // handle title button press
@@ -193,12 +199,12 @@ const ChangeProfilePage = () => {
 
   const handleRevertPress = useCallback(() => {
     // Reset all changes
-    setEmail(user.email);
-    setName(user.name || '');
+    setEmail(user?.email);
+    setName(user?.name || '');
+    setImageUrl(user?.avatarUrl || null);
 
     // Change all fields to read only
     setEditable(false);
-    setImageUrl(null);
   }, [user]);
 
   const handleEditPress = useCallback(() => {
@@ -206,7 +212,7 @@ const ChangeProfilePage = () => {
   }, []);
 
   // image picker
-  const [imageUrl, setImageUrl] = useState(null);
+  const [imageUrl, setImageUrl] = useState(user?.avatarUrl || null);
   const [imageData, setImageData] = useState(null);
   const imagePickingAsync = useCallback(async () => {
     const results = await ImagePicker.launchImageLibraryAsync({
@@ -223,32 +229,64 @@ const ChangeProfilePage = () => {
   }, []);
 
   // submit update
-  const isChanged = email != user.email ||
+  const isChanged = email != user?.email ||
     (name != orginalName) ||
-    (imageUrl != user.avatar);
+    (imageUrl != user?.avatarUrl);
+
+  const isValidEmail = checkEmail(email);
+
+  const isValidName = name.length > 0;
+
+  const submitDisabled = !isChanged || !isValidEmail || !isValidName;
+
   const [isLoading, setIsLoading] = useState(false);
   const handleSubmit = useCallback(async () => {
     console.log('submit');
-    // submit avatar
-    // to imgur
-    let imageLink = null;
-    if (imageData != null) {
-      const data = new FormData();
-      data.append('image', imageData);
-      data.append('name', "user-avatar-" + user.id);
-      fetch(process.env.IMAGE_UPLOAD_URL, {
-        method: 'post',
-        headers: {
-          Authorization: "Client-ID " + process.env.IMGUR_CLIENT_ID,
-        },
-        body: data,
-      }).then((res) => res.json()).then((res) => {
-        imageLink = res.data.link;
-        console.log(imageLink);
+    try {
+      setIsLoading(true);
+      // submit avatar
+      // to imgur
+      let imageLink = null;
+      if (imageData != null) {
+        const data = new FormData();
+        data.append('image', imageData);
+        data.append('name', "user-avatar-" + user.id);
+        await fetch(process.env.IMAGE_UPLOAD_URL, {
+          method: 'post',
+          headers: {
+            Authorization: "Client-ID " + process.env.IMGUR_CLIENT_ID,
+          },
+          body: data,
+        }).then((res) => res.json()).then((res) => {
+          imageLink = res.data.link;
+          console.log(imageLink);
+        });
+      }
+      // to user database
+      const res = await changeProfile(user.id, {
+        name: name,
+        avatarUrl: imageLink,
+        email: email,
       });
+      if (res.error) {
+        throw new Error(res.error);
+      } else {
+        Alert.alert('', 'Your information has been updated successfully.', [
+          { text: 'OK', onPress: () => {} },
+        ]);
+        console.log(res);
+        await updateUser(res);
+        router.back();
+      }
+    } catch (error) {
+      console.log(error);
+      Alert.alert('', 'An error occured. Please try again.', [
+        { text: 'OK', onPress: () => {} },
+      ]);
+    } finally {
+      setIsLoading(false);
     }
-    // TODO: to user database
-  }, [imageData, user.id]);
+  }, [imageData, user.id, email, name, router, updateUser]);
 
 
   return (
@@ -280,6 +318,8 @@ const ChangeProfilePage = () => {
                 _disabled={{
                   onChangeText: null,
                 }}
+                isInvalid={showNameHelper}
+                invalidMessage='Name must not be empty.'
               />
               <InputWithLabel
                 isReadOnly={!editable}
@@ -288,9 +328,11 @@ const ChangeProfilePage = () => {
                 value={email}
                 placeholder="Email"
                 type='text'
+                isInvalid={!isValidEmail}
+                invalidMessage="Invalid email."
               />
               <BlueButton
-                isDisabled={!isChanged}
+                isDisabled={submitDisabled}
                 isLoading={isLoading}
                 onPress={handleSubmit}
                 title='Update'

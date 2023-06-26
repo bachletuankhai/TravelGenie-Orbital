@@ -4,10 +4,11 @@ import {
 } from "native-base";
 
 export default function InputWithLabel({
-  value, onChangeText, label, placeholder, _label, _input, type, isReadOnly,
+  value, onChangeText, label, placeholder, _label, _input,
+  type, isReadOnly, isInvalid=false, invalidMessage="",
 }) {
   return (
-    <FormControl>
+    <FormControl isInvalid={isInvalid}>
       <FormControl.Label
         left='2'
         _text={{
@@ -38,6 +39,9 @@ export default function InputWithLabel({
         placeholder={placeholder}
         {..._input}
       />
+      <FormControl.ErrorMessage left='2'>
+        {invalidMessage}
+      </FormControl.ErrorMessage>
     </FormControl>
   );
 }

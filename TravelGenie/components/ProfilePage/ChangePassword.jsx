@@ -12,11 +12,13 @@ import {
 import { useCallback, useState } from 'react';
 import TitleHeader from '../TitleHeader';
 import {
-  checkPassword,
+  checkPassword, useAuthContext,
 } from '../../contexts/auth';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import BlueButton from '../BlueButton';
+import { changePassword } from '../../lib/connectBackend';
+import { Alert } from 'react-native';
 
 function Password({
   value, onChangeText, isShown, setShow, showHelper=false, title, helperText='',
@@ -124,12 +126,34 @@ export default function ChangePassword() {
 
   const router = useRouter();
 
+  const { user } = useAuthContext();
+
   const [isLoading, setIsLoading] = useState(false);
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     console.log("submit");
     // TODO: setup api call to update password
-  }, []);
-  const submitDisabled = !isValidCfPassword || !isValidPassword;
+    try {
+      setIsLoading(true);
+      const { error } = await changePassword(user.id, oldPassword, newPassword);
+      if (error) {
+        throw new Error(error);
+      } else {
+        Alert.alert('', 'Your password has been changed successfully.', [
+          { text: 'OK', onPress: () => {} },
+        ]);
+      }
+    } catch (error) {
+      console.log(error);
+      Alert.alert('', error.message ||
+       'An error occured. Please check your passwords and try again.', [
+        { text: 'OK', onPress: () => {} },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [newPassword, oldPassword, user]);
+  const submitDisabled = !isValidCfPassword ||
+   !isValidPassword || oldPassword.length == 0;
 
   return (
     <Center w="100%" bgColor='white'>

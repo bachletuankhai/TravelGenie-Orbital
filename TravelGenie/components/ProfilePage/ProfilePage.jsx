@@ -24,7 +24,12 @@ function NameCard() {
   return (
     <HStack mt='5' px='5' mb='5'>
       <Box>
-        <Image size='lg' source={DefaultProfile} alt='Profile Picture' />
+        <Image
+          size='lg'
+          source={user?.avatarUrl ? { uri: user.avatarUrl } : DefaultProfile}
+          borderRadius='full'
+          alt='Profile Picture'
+        />
       </Box>
       <VStack justifyContent='center' ml='3'>
         <Text
@@ -32,14 +37,14 @@ function NameCard() {
           color='#5F6368'
           fontSize='md'
         >
-          {user.name || "Your Name"}
+          {user?.name || "Your Name"}
         </Text>
         <Text
           fontWeight='400'
           color='#5F6368'
           fontSize='md'
         >
-          {user.email}
+          {user?.email || "Email"}
         </Text>
       </VStack>
     </HStack>
@@ -63,7 +68,7 @@ function SignoutButton() {
   );
 }
 
-// TODO: add link to setting and payment info pages
+// TODO: add link to payment info pages
 const sections = [
   {
     id: 0,
