@@ -14,8 +14,10 @@ import {
   useState,
   useCallback,
   useRef,
+  useContext,
 } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { FirstLaunchContext } from '../../contexts/firstLaunch';
 
 const data = [
   {
@@ -91,6 +93,7 @@ export default function List() {
   const { width, height } = useWindowDimensions();
   const flatListRef = useRef(null);
   const [currentSelectionIndex, setCurrentSelectionIndex] = useState(0);
+  const { onDoneOnboarding } = useContext(FirstLaunchContext);
 
   const renderItem = useCallback(
       ({ item }) => (
@@ -105,16 +108,16 @@ export default function List() {
       [width],
   );
 
-  const handleNextPress = useCallback(() => {
+  const handleNextPress = useCallback(async () => {
     if (currentSelectionIndex === data.length - 1) {
-      // TODO: end of list, to page in design
+      await onDoneOnboarding();
     } else if (flatListRef.current) {
       // Go to the next item
       flatListRef.current.scrollToIndex({
         index: currentSelectionIndex + 1,
       });
     }
-  }, [currentSelectionIndex]);
+  }, [currentSelectionIndex, onDoneOnboarding]);
 
   const onScroll = useCallback(({ viewableItems }) => {
     if (viewableItems.length === 1) {
@@ -122,12 +125,12 @@ export default function List() {
     }
   }, []);
 
-  const onSkip = useCallback(() => {
-    // TODO: skip to login page
-  }, []);
+  const onSkip = useCallback(async () => {
+    await onDoneOnboarding();
+  }, [onDoneOnboarding]);
 
   return (
-    <Center w="100%">
+    <Center w="100%" bgColor='white'>
       <Box
         safeArea w="100%" maxW='420' h={height}
         justifyContent='space-between'
@@ -170,6 +173,9 @@ export default function List() {
               color: 'white',
               fontSize: 'sm',
               fontWeight: '700',
+            }}
+            _pressed={{
+              bgColor: 'primary.600',
             }}
             onPress={handleNextPress}
           >

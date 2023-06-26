@@ -6,7 +6,7 @@ const path = "M6.328 12.703c.875.875 1.938 1.313 3.188 1.313 1.25 0 2.312-.438 3
 
 function SearchIcon({ color, size }) {
   return (
-    <Icon size={size} viewBox="0 0 24 24">
+    <Icon size={size} viewBox="0 0 24 24" ml='4'>
       <G fillRule="nonzero" stroke="none" fill="none">
         <Path d={path} fill={color} />
       </G>

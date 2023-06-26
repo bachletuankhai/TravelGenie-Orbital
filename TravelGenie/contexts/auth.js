@@ -1,23 +1,44 @@
-import { createContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { handleLogin, handleRegister } from '../lib/connectBackend';
 import { Alert } from 'react-native';
+import { FirstLaunchContext } from './firstLaunch';
 
 export const AuthContext = createContext({});
+
+export function useAuthContext() {
+  return useContext(AuthContext);
+}
 
 function useProtectedRoute(user) {
   const segments = useSegments();
   const router = useRouter();
+  const { doneOnboarding } = useContext(FirstLaunchContext);
 
   useEffect(() => {
+    // console.log("useProtectedRoute useEffect called");
     const inAuthGroup = segments[0] === "(auth)";
-    if (!user && !inAuthGroup) {
-      router.replace("/login");
+    const inOnboardingGroup = segments[0] === "(onboarding)";
+    if (!doneOnboarding) {
+      if (!inOnboardingGroup) {
+        router.replace('/onboarding');
+      }
+    } else if (inOnboardingGroup) {
+      // if in onboarding group and finished onboarding, redirect to login page
+      router.replace('/login');
+    } else if (!user && !inAuthGroup) {
+      router.replace('/login');
     } else if (user && inAuthGroup) {
-      router.replace("/");
+      router.replace('/');
     }
-  }, [user, segments, router]);
+  }, [user, segments, router, doneOnboarding]);
 }
 
 export function checkEmail(email) {
@@ -43,8 +64,8 @@ export function AuthProvider({ children }) {
 
   const isLoggedIn = async () => {
     try {
-      const user = await AsyncStorage.getItem('user');
-      setUser(user);
+      const lastUser = await AsyncStorage.getItem('user');
+      setUser(JSON.parse(lastUser));
     } catch (error) {
       console.log(`isLoggedIn error: ${error}`);
     }
@@ -87,6 +108,15 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateUser = useCallback(async (data) => {
+    const updatedUser = {
+      ...user,
+      ...data,
+    };
+    setUser(updatedUser);
+    await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+  }, [user]);
+
   useEffect(() => {
     isLoggedIn();
   }, []);
@@ -94,7 +124,7 @@ export function AuthProvider({ children }) {
   useProtectedRoute(user);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register }}>
+    <AuthContext.Provider value={{ user, login, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

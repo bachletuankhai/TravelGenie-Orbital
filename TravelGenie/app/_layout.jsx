@@ -2,6 +2,7 @@ import { NativeBaseProvider, extendTheme } from 'native-base';
 import {
   SplashScreen,
   Slot,
+  Stack,
 } from 'expo-router';
 import {
   useFonts,
@@ -25,6 +26,7 @@ import {
   Poppins_900Black_Italic,
 } from '@expo-google-fonts/poppins';
 import { AuthProvider } from '../contexts/auth';
+import { FirstLaunchProvider } from '../contexts/firstLaunch';
 
 const fontConfig = {
   Poppins: {
@@ -172,10 +174,16 @@ export default function AppLayout() {
   });
 
   return (
-    <AuthProvider>
-      <NativeBaseProvider theme={theme}>
-        <Slot />
-      </NativeBaseProvider>
-    </AuthProvider>
+    <FirstLaunchProvider>
+      <AuthProvider>
+        <NativeBaseProvider theme={theme}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          />
+        </NativeBaseProvider>
+      </AuthProvider>
+    </FirstLaunchProvider>
   );
 }
