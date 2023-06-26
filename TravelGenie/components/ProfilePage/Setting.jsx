@@ -4,13 +4,14 @@ import Title from "../TitleHeader";
 import { useRouter } from "expo-router";
 import { useCallback } from "react";
 import ShadeButton from "./ShadeButton";
+import { PasswordIcon, TrashcanIcon } from "../../assets/icons/profilepage";
 
 const sections = [
   {
     id: 0,
     type: "Button",
     title: "Change Password",
-    iconLeft: null,
+    iconLeft: PasswordIcon,
     href: '/profile/changePassword',
   },
   {
@@ -20,8 +21,11 @@ const sections = [
 ];
 
 function DeleteAccount() {
+  const router = useRouter();
+
   return (
     <ShadeButton
+      onPress={() => router.push('/profile/deleteAccount')}
       title="Delete Account"
       _text={{
         fontWeight: 700,
@@ -29,7 +33,7 @@ function DeleteAccount() {
         fontSize: 'md',
       }}
       mt='50'
-      leftIcon={null}
+      leftIcon={<TrashcanIcon size='xl' px='4' color="#f21d1d" />}
     />
   );
 }
@@ -41,7 +45,7 @@ export default function SettingPage() {
     if (item.type == "Button") {
       return (
         <ShadeButton
-          // leftIcon={<item.iconLeft size='lg' px='4'/>}
+          leftIcon={<item.iconLeft size='lg' px='4' color="#000000"/>}
           title={item.title}
           mt='5'
           onPress={() => router.push(item.href)}
