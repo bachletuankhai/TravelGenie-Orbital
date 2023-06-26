@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { handleLogin, handleRegister } from '../lib/connectBackend';
@@ -6,6 +12,10 @@ import { Alert } from 'react-native';
 import { FirstLaunchContext } from './firstLaunch';
 
 export const AuthContext = createContext({});
+
+export function useAuthContext() {
+  return useContext(AuthContext);
+}
 
 function useProtectedRoute(user) {
   const segments = useSegments();
@@ -54,8 +64,8 @@ export function AuthProvider({ children }) {
 
   const isLoggedIn = async () => {
     try {
-      const user = await AsyncStorage.getItem('user');
-      setUser(user);
+      const lastUser = await AsyncStorage.getItem('user');
+      setUser(JSON.parse(lastUser));
     } catch (error) {
       console.log(`isLoggedIn error: ${error}`);
     }
@@ -98,6 +108,15 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateUser = useCallback(async (data) => {
+    const updatedUser = {
+      ...user,
+      ...data,
+    };
+    setUser(updatedUser);
+    await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+  }, [user]);
+
   useEffect(() => {
     isLoggedIn();
   }, []);
@@ -105,7 +124,7 @@ export function AuthProvider({ children }) {
   useProtectedRoute(user);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register }}>
+    <AuthContext.Provider value={{ user, login, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
