@@ -17,6 +17,8 @@ import { categories } from "../../lib/categories";
 import SearchBar from '../SearchBar';
 import { MapIcon } from '../../assets/icons/navbar';
 import { Link, useRouter } from 'expo-router';
+import { useHomeLocationContext } from '../../contexts/homeLocation';
+import { useState } from 'react';
 
 function Category({ item }) {
   const opacity = item.isShown ? 1 : 0.6;
@@ -85,7 +87,7 @@ function StartButton() {
   );
 }
 
-function TitleBar() {
+function TitleBar({ cityName="" }) {
   return (
     <HStack
       h='48px'
@@ -110,7 +112,7 @@ function TitleBar() {
           ml='3'
           isTruncated
         >
-          Singapore
+          {cityName}
         </Text>
       </HStack>
       <HStack
@@ -134,7 +136,7 @@ function TitleBar() {
   );
 }
 
-function ToolBox() {
+function ToolBox({ cityName }) {
   return (
     <Box
       flex='1'
@@ -147,12 +149,12 @@ function ToolBox() {
       <VStack
         space='15px'
       >
-        <TitleBar />
+        <TitleBar cityName="Singapore" />
 
         <Box
           px='30px'
         >
-          <SearchBar enableVoice={true}/>
+          <SearchBar enableVoice={false}/>
         </Box>
 
         <Categories />
@@ -166,6 +168,13 @@ function ToolBox() {
 }
 
 export default function HomePage() {
+  const { location } = useHomeLocationContext();
+  const [city, setCity] = useState("");
+
+  if (location) {
+    // TODO: reverse geocoding to get address
+  }
+
   return (
     <Center w='100%' bg='#FAF9F7'>
       <Box
@@ -180,7 +189,9 @@ export default function HomePage() {
             flexDirection: 'column',
           }}
         >
-          <ToolBox />
+          <ToolBox
+            cityName={city}
+          />
           <Box>
             <Link href={'/(home)/discover/'}>
               <Text>Discover</Text>

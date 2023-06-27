@@ -8,6 +8,7 @@ import {
   ProfileIcon,
 } from '../../assets/icons/navbar';
 import { iconColors } from "../../assets/colors/iconColors";
+import { LocationProvider } from "../../contexts/homeLocation";
 
 const pages = [
   {
@@ -44,56 +45,58 @@ const pages = [
 
 export default function HomeLayout() {
   return (
-    <Tabs screenOptions={{
-      tabBarShowLabel: false,
-      headerShown: false,
-      tabBarStyle: {
-        borderTopWidth: 0, // TODO: set to 0 when front end done
-        height: 90,
-        position: 'absolute',
-      },
-      tabBarItemStyle: {
-      },
-      tabBarActiveTintColor: iconColors.dark,
-      tabBarInactiveTintColor: iconColors.unselected,
-      tabBarHideOnKeyboard: true,
-    }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarIcon: HomeIcon,
-        }}
-      />
-      <Tabs.Screen
-        name="discover"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="itinerary"
-        options={{
-          tabBarIcon: MapIcon,
-        }}
-      />
-      <Tabs.Screen
-        name="map"
-        options={{
-          tabBarIcon: LocationIcon,
-        }}
-      />
-      <Tabs.Screen
-        name="favorite"
-        options={{
-          tabBarIcon: BookmarkIcon,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ProfileIcon,
-        }}
-      />
-    </Tabs>
+    <LocationProvider>
+      <Tabs screenOptions={{
+        tabBarShowLabel: false,
+        headerShown: false,
+        tabBarStyle: {
+          borderTopWidth: 0, // TODO: set to 0 when front end done
+          height: 90,
+          position: 'absolute',
+        },
+        tabBarItemStyle: {
+        },
+        tabBarActiveTintColor: iconColors.dark,
+        tabBarInactiveTintColor: iconColors.unselected,
+        tabBarHideOnKeyboard: true,
+      }}>
+        <Tabs.Screen
+          name="index"
+          options={{
+            tabBarIcon: HomeIcon,
+          }}
+        />
+        <Tabs.Screen
+          name="discover"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="itinerary"
+          options={{
+            tabBarIcon: MapIcon,
+          }}
+        />
+        <Tabs.Screen
+          name="map"
+          options={{
+            tabBarIcon: LocationIcon,
+          }}
+        />
+        <Tabs.Screen
+          name="favorite"
+          options={{
+            tabBarIcon: BookmarkIcon,
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            tabBarIcon: ProfileIcon,
+          }}
+        />
+      </Tabs>
+    </LocationProvider>
   );
 }
