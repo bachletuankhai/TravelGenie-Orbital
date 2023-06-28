@@ -157,16 +157,21 @@ export default function LoginPage() {
   };
 
   const handleLogin = async () => {
-    setIsLoading(true);
-    if (!checkEmail(email)) {
-      setIsLoading(false);
-      loginAlert("Incorrect email and/or password.");
-    } else {
-      const { error } = await login(email, password);
-      setIsLoading(false);
-      if (error) {
-        loginAlert(error);
+    try {
+      setIsLoading(true);
+      if (!checkEmail(email)) {
+        loginAlert("Incorrect email and/or password.");
+      } else {
+        const { error } = await login(email, password);
+        if (error) {
+          loginAlert(error);
+        }
       }
+    } catch (error) {
+      console.log(error);
+      loginAlert("Incorrect email and/or password.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -175,7 +180,7 @@ export default function LoginPage() {
   return (
     <Center w="100%" bgColor='white'>
       <Box safeArea w="100%" maxW='420'>
-        <KeyboardAvoidingView behavior='padding'>
+        <KeyboardAvoidingView behavior='height'>
           <ScrollView w="100%" h="100%"
             _contentContainerStyle={{
               flexGrow: 1,
