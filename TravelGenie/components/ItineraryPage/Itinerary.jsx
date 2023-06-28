@@ -115,29 +115,29 @@ const data = [
   {
     id: 0,
     name: "Singpore",
-    startDate: "May 10, 2023",
-    endDate: "June 1, 2023",
+    startDate: "2023-05-10",
+    endDate: "2023-06-01",
     coverPhoto: "https://www.hostelworld.com/blog/wp-content/uploads/2017/08/girlgoneabroad.jpg",
   },
   {
     id: 1,
     name: "Singpore",
-    startDate: "May 10, 2023",
-    endDate: "June 1, 2023",
+    startDate: "2023-05-10",
+    endDate: "2023-06-01",
     coverPhoto: "https://www.hostelworld.com/blog/wp-content/uploads/2017/08/lovelyforliving.jpg",
   },
   {
     id: 2,
     name: "Singpore",
-    startDate: "May 10, 2023",
-    endDate: "June 1, 2023",
+    startDate: "2023-05-10",
+    endDate: "2023-06-01",
     coverPhoto: "https://www.hostelworld.com/blog/wp-content/uploads/2017/08/jetsetchristina-2.jpg",
   },
   {
     id: 3,
     name: "Singpore",
-    startDate: "May 10, 2023",
-    endDate: "June 1, 2023",
+    startDate: "2023-05-10",
+    endDate: "2023-06-01",
     coverPhoto: "https://www.hostelworld.com/blog/wp-content/uploads/2017/09/heartmybackpack-2.jpg",
   },
 ];
@@ -151,10 +151,10 @@ const ItineraryPage = () => {
       <ItineraryItemCard
         item={item}
         mb='3'
-        onPress={() => console.log(`Item ${item.id} pressed`)}
+        onPress={() => router.push(`/itinerary/view/${item.id}`)}
       />
     );
-  }, []);
+  }, [router]);
 
   const paddingBottom = useBottomTabBarHeight();
 
