@@ -149,7 +149,7 @@ function ToolBox({ cityName }) {
       <VStack
         space='15px'
       >
-        <TitleBar cityName="Singapore" />
+        <TitleBar cityName={cityName} />
 
         <Box
           px='30px'
@@ -168,12 +168,9 @@ function ToolBox({ cityName }) {
 }
 
 export default function HomePage() {
-  const { location } = useHomeLocationContext();
-  const [city, setCity] = useState("");
+  const { address } = useHomeLocationContext();
 
-  if (location) {
-    // TODO: reverse geocoding to get address
-  }
+  const cityName = address?.city || address?.country || "";
 
   return (
     <Center w='100%' bg='#FAF9F7'>
@@ -190,7 +187,7 @@ export default function HomePage() {
           }}
         >
           <ToolBox
-            cityName={city}
+            cityName={cityName}
           />
           <Box>
             <Link href={'/(home)/discover/'}>
