@@ -2,11 +2,29 @@ import {
   Box,
   Pressable,
   Text,
+  VStack,
 } from 'native-base';
 import { ImageBackground } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useMemo } from 'react';
 
 const ItineraryItemCard = ({ onPress, item, _text, ...props }) => {
+  const dateString = useMemo(() => {
+    const startDate = new Date(item.startDate);
+    const endDate = new Date(item.endDate);
+    const startDateStr = startDate.toLocaleString('en-US', {
+      month: 'long', day: 'numeric',
+    });
+    const endDateStr = endDate.toLocaleString('en-US', {
+      month: 'long', day: 'numeric',
+    });
+    console.log(startDateStr);
+    console.log(endDateStr);
+    return `${startDateStr} - ${endDateStr}`;
+  }, [item]);
+
+  console.log(dateString);
+
   return (
     <Pressable onPress={onPress}>
       {({
@@ -50,22 +68,38 @@ const ItineraryItemCard = ({ onPress, item, _text, ...props }) => {
                 backgroundColor: "transparent",
               }}
             >
-              <Text
-                {..._text}
+              <VStack
                 position='absolute'
-                bottom='1'
+                bottom='3'
                 left='0'
                 w='100%'
-                color='white'
-                fontWeight='700'
-                fontSize='lg'
-                flex='1'
-                flexShrink={1}
-                flexWrap='wrap'
-                ml='14px'
+                space='0.5'
               >
-                {item.name}
-              </Text>
+                <Text
+                  {..._text}
+                  color='white'
+                  fontWeight='700'
+                  fontSize='lg'
+                  flex='1'
+                  flexShrink={1}
+                  flexWrap='wrap'
+                  ml='14px'
+                >
+                  {item.name}
+                </Text>
+                <Text
+                  {..._text}
+                  color='white'
+                  fontWeight='700'
+                  fontSize='lg'
+                  flex='1'
+                  flexShrink={1}
+                  flexWrap='wrap'
+                  ml='14px'
+                >
+                  {dateString}
+                </Text>
+              </VStack>
             </LinearGradient>
           </ImageBackground>
         </Box>
