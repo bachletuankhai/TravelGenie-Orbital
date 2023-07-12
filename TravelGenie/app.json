@@ -27,7 +27,8 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.FOREGROUND_SERVICE"
-      ]
+      ],
+      "package": "com.bachletuankhai.TravelGenie"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -38,7 +39,7 @@
         "@rnmapbox/maps",
         {
           "RNMapboxMapsImpl": "mapbox",
-          "RNMapboxMapsDownloadToken": "sk.ey...qg"
+          "RNMapboxMapsDownloadToken": "sk.eyJ1Ijoia2xhbmM4OTg5IiwiYSI6ImNsamZvMXE5dTAyYnYzdG5yMDF1dXVxdjAifQ.2eMbn1OB84X3xY4vsCzU2A"
         }
       ],
       [
