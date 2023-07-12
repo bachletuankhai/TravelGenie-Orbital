@@ -10,20 +10,20 @@ import { useMemo } from 'react';
 
 const ItineraryItemCard = ({ onPress, item, _text, ...props }) => {
   const dateString = useMemo(() => {
-    const startDate = new Date(item.startDate);
-    const endDate = new Date(item.endDate);
+    const startDate = new Date(item.start_date);
+    const endDate = new Date(item.end_date);
     const startDateStr = startDate.toLocaleString('en-US', {
       month: 'long', day: 'numeric',
     });
     const endDateStr = endDate.toLocaleString('en-US', {
       month: 'long', day: 'numeric',
     });
-    console.log(startDateStr);
-    console.log(endDateStr);
+    // console.log(startDateStr);
+    // console.log(endDateStr);
     return `${startDateStr} - ${endDateStr}`;
   }, [item]);
 
-  console.log(dateString);
+  // console.log(dateString);
 
   return (
     <Pressable onPress={onPress}>
@@ -40,7 +40,7 @@ const ItineraryItemCard = ({ onPress, item, _text, ...props }) => {
           borderWidth={0}
         >
           <ImageBackground
-            source={{ uri: item.coverPhoto }}
+            source={{ uri: item.photo_url }}
             resizeMode='cover'
             imageStyle={{
               borderRadius: 10,

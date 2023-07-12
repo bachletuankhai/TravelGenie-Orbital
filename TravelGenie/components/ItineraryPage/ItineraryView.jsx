@@ -10,15 +10,17 @@ import {
   IconButton,
   Button,
 } from "native-base";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
+  View, useWindowDimensions,
 } from 'react-native';
 import { useRouter } from "expo-router";
 import { Entypo } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { LocationIcon } from "../../assets/icons/itinerary";
-import { LinearGradient } from 'expo-linear-gradient';
+import axios from "axios";
+
+// TODO: add api call to update info
 
 function CalendarItemCard({
   isSelected=false, isOutOfRange, dayOfWeek, date, onPress,
@@ -66,6 +68,8 @@ const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 function WeekCalendar({
   firstDayOfWeek, startDate, endDate, currentSelection, onDatePress,
 }) {
+  const { width, height } = useWindowDimensions();
+  console.log(`current: ${currentSelection}`);
   const days = useMemo(() => {
     const week = [0, 1, 2, 3, 4, 5, 6];
     const days = week.map((date) => {
@@ -96,7 +100,7 @@ function WeekCalendar({
   // console.log(`end: ${end} ` + endDate);
 
   return (
-    <Box w='100%' alignItems='center'>
+    <Box w={width} alignItems='center'>
       <HStack w='100%' justifyContent='space-around' px='15px'>
         {days.map((day, index) => {
           const time = day.getTime();
@@ -121,6 +125,7 @@ function Title({
 }) {
   const router = useRouter();
 
+  // TODO: add functionality to the menu bar
   const defaultBack = useCallback(() => {
     router.back();
   }, [router]);
@@ -182,9 +187,11 @@ function getFirstDayOfWeek(currentDate) {
   return firstDayOfWeek;
 }
 
+// TODO: add function to switch to specified day and extend the plan
 const HEADER_HEIGHT = 230;
 function Header({ currentDateSelection, startDate, endDate }) {
   // generate week range consisting start date and end date
+  console.log(`current date: ${currentDateSelection}`);
   const weeks = useMemo(() => {
     const weeks = [];
     const endTime = new Date(endDate).getTime();
@@ -204,6 +211,9 @@ function Header({ currentDateSelection, startDate, endDate }) {
     }
     return weeks;
   }, [startDate, endDate]);
+
+  console.log(weeks);
+  console.log(currentDateSelection);
 
   const weekCalendarRender = useCallback(({ item }) => {
     return (
@@ -237,17 +247,13 @@ function Header({ currentDateSelection, startDate, endDate }) {
           <FlatList
             ref={calendarFlatListRef}
             horizontal={true}
-            pagingEnabled
             data={weeks}
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
             renderItem={weekCalendarRender}
             viewabilityConfig={{
               minimumViewTime: 1,
               itemVisiblePercentThreshold: 60,
-            }}
-            showsHorizontalScrollIndicator={false}
-            initialNumToRender={3}
-            contentContainerStyle={{
-              flex: 1,
             }}
           />
         </Box>
@@ -289,7 +295,11 @@ function Header({ currentDateSelection, startDate, endDate }) {
   );
 }
 
+// TODO: add day number view (day 1, day 2, etc)
+
 function LocationItemCard({ item }) {
+  // TODO: add edit function
+  // TODO: add link to map view
   return (
     <HStack h='120px' w='100%'>
       <Box
@@ -308,7 +318,7 @@ function LocationItemCard({ item }) {
             fontSize='md'
             color='#212525'
           >
-            {item.startTime}
+            {item.start_time}
           </Text>
           <Text
             textAlign='right'
@@ -316,7 +326,7 @@ function LocationItemCard({ item }) {
             fontSize='sm'
             color='#BCC1CD'
           >
-            {item.endTime}
+            {item.end_time}
           </Text>
         </VStack>
       </Box>
@@ -463,19 +473,40 @@ const data = [
   },
 ];
 
-export default function ItineraryView() {
+export default function ItineraryView({ itemId }) {
   const tabBarHeight = useBottomTabBarHeight();
+
+  const [planDetail, setPlanDetail] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [realData, setRealData] = useState([]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    // TODO: use backend url in env
+    const api = "http://192.168.0.6:3000" + '/itineraries/' + itemId;
+    console.log(api);
+    axios.get(api)
+        .then((res) => res.data)
+        .then((res) => {
+          console.log(res.results.details);
+          console.log(res.results.items);
+          setPlanDetail(res.results.details);
+          setRealData(res.results.items);
+        })
+        .catch((err) => console.warn(err))
+        .then((x) => setIsLoading(false));
+  }, [itemId]);
 
   return (
     <Center w="100%" flex='1' bg='white'>
-      <Box w="100%" flex='1'>
+      {!isLoading && <Box w="100%" flex='1'>
         <Header
-          currentDateSelection="2023-01-23"
-          startDate='2023-01-23'
-          endDate='2023-01-25'
+          currentDateSelection={planDetail.start_date}
+          startDate={planDetail.start_date}
+          endDate={planDetail.end_date}
         />
         <FlatList
-          data={data}
+          data={realData}
           renderItem={LocationItemCard}
           contentContainerStyle={{
             flexGrow: 0,
@@ -484,7 +515,7 @@ export default function ItineraryView() {
             paddingHorizontal: 28,
           }}
         />
-      </Box>
+      </Box>}
     </Center>
   );
 }

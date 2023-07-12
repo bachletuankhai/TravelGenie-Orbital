@@ -1,4 +1,4 @@
-import { FlatList } from 'react-native';
+import { ActivityIndicator, FlatList } from 'react-native';
 import Title from '../TitleHeader';
 import {
   Box,
@@ -7,11 +7,15 @@ import {
   IconButton,
   VStack,
   AddIcon,
+  WarningOutlineIcon,
+  Text,
 } from 'native-base';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import ItineraryItemCard from './ItineraryItemCard';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
+import { useAuthContext } from '../../contexts/auth';
 
 const sections = [
   {
@@ -27,6 +31,9 @@ const sections = [
     title: "Cancelled",
   },
 ];
+
+// TODO: set api call to get data and organize data
+// into corresponding category
 
 const HEADER_HEIGHT = 100;
 
@@ -111,39 +118,45 @@ function AddButton({ onPress, ...props }) {
   );
 }
 
-const data = [
-  {
-    id: 0,
-    name: "Singpore",
-    startDate: "2023-05-10",
-    endDate: "2023-06-01",
-    coverPhoto: "https://www.hostelworld.com/blog/wp-content/uploads/2017/08/girlgoneabroad.jpg",
-  },
-  {
-    id: 1,
-    name: "Singpore",
-    startDate: "2023-05-10",
-    endDate: "2023-06-01",
-    coverPhoto: "https://www.hostelworld.com/blog/wp-content/uploads/2017/08/lovelyforliving.jpg",
-  },
-  {
-    id: 2,
-    name: "Singpore",
-    startDate: "2023-05-10",
-    endDate: "2023-06-01",
-    coverPhoto: "https://www.hostelworld.com/blog/wp-content/uploads/2017/08/jetsetchristina-2.jpg",
-  },
-  {
-    id: 3,
-    name: "Singpore",
-    startDate: "2023-05-10",
-    endDate: "2023-06-01",
-    coverPhoto: "https://www.hostelworld.com/blog/wp-content/uploads/2017/09/heartmybackpack-2.jpg",
-  },
-];
+function ErrorPage(props) {
+  return (
+    <VStack {...props}>
+      <WarningOutlineIcon size='5xl' color='#8A8D9F' />
+      <Text
+        fontWeight='700'
+        fontSize='xl'
+        textAlign='center'
+      >
+        Oh no!
+      </Text>
+      <Text
+        fontWeight='400'
+        fontSize='md'
+        color='#8A8D9F'
+        textAlign='center'
+      >
+        We are sorry, but some errors occured.
+      </Text>
+    </VStack>
+  );
+}
 
+function LoadingPage(props) {
+  return (
+    <Box>
+      <ActivityIndicator />
+    </Box>
+  );
+}
+
+const loadingStates = {
+  done: 0,
+  loading: 1,
+  error: -1,
+};
 const ItineraryPage = () => {
   const [currentSelection, setCurrentSelection] = useState(0);
+  const [loadingState, setLoadingState] = useState(loadingStates.done);
   const router = useRouter();
 
   const render = useCallback(({ item }) => {
@@ -155,6 +168,32 @@ const ItineraryPage = () => {
       />
     );
   }, [router]);
+
+  const { user } = useAuthContext();
+
+  const [realData, setRealData] = useState([]);
+  useEffect(() => {
+    setLoadingState(loadingStates.loading);
+    // TODO change back to use env url
+    const api = "http://192.168.0.6:3000" + '/itineraries/user/' + user?.id;
+    console.log(api);
+    axios.get(
+        api,
+    )
+        .then((res) => res.data)
+        .then((res) => {
+          setRealData(res.results);
+          return res.results;
+        })
+        .then((res) => {
+          console.log(res);
+          setLoadingState(loadingStates.done);
+        })
+        .catch((err) => {
+          console.warn(err);
+          setLoadingState(loadingStates.error);
+        });
+  }, [user]);
 
   const paddingBottom = useBottomTabBarHeight();
 
@@ -171,15 +210,17 @@ const ItineraryPage = () => {
           right='27'
           zIndex={13}
         />
-        <FlatList
+        {loadingState == loadingStates.done && <FlatList
           contentContainerStyle={{
             paddingBottom: paddingBottom,
             paddingTop: HEADER_HEIGHT + 15,
             paddingHorizontal: 20,
           }}
-          data={data}
+          data={realData}
           renderItem={render}
-        />
+        />}
+        {loadingState == loadingStates.error && <ErrorPage />}
+        {loadingState == loadingStates.loading && <LoadingPage />}
       </Box>
     </Center>
   );
