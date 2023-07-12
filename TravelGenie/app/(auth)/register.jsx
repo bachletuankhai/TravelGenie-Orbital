@@ -244,23 +244,30 @@ export default function RegisterPage() {
   };
 
   const signUpHandler = async () => {
-    setIsLoading(true);
-    if (!checkEmail(email) || !checkPassword(password)) {
-      setIsLoading(false);
-      loginAlert("Invalid email and/or password.");
-    } else {
-      const { error } = await register(email, password);
-      setIsLoading(false);
-      if (error) {
-        loginAlert(error);
+    try {
+      setIsLoading(true);
+      if (!checkEmail(email) || !checkPassword(password)) {
+        setIsLoading(false);
+        loginAlert("Invalid email and/or password.");
+      } else {
+        const { error } = await register(email, password);
+        setIsLoading(false);
+        if (error) {
+          loginAlert(error);
+        }
       }
+    } catch (error) {
+      console.log(error);
+      loginAlert("An error occured. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Center w="100%" bgColor='white'>
       <Box safeArea w="100%" maxW='420'>
-        <KeyboardAvoidingView behavior='padding'>
+        <KeyboardAvoidingView behavior='height'>
           <ScrollView w="100%" h="100%"
             _contentContainerStyle={{
               flexGrow: 1,

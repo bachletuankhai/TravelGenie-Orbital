@@ -1,6 +1,6 @@
 import {
   MapPage,
-} from '../../components';
+} from '../../../components';
 
 export default function Map() {
   return (

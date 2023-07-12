@@ -1,11 +1,262 @@
-import { View, Text } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Mapbox, { MarkerView } from '@rnmapbox/maps';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useHomeLocationContext } from '../../contexts/homeLocation';
+import {
+  Camera,
+  MapView,
+} from '@rnmapbox/maps';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  AddIcon,
+  Box,
+  Button,
+  Circle,
+  HStack,
+  IconButton,
+  SearchIcon,
+  Text,
+  VStack,
+} from 'native-base';
+import { MaterialIcons } from '@expo/vector-icons';
+import { DefaultMarker } from '../../assets/icons/map';
+import { useRouter } from 'expo-router';
+import { useMarkerContext } from '../../contexts/mapMarkers';
 
-const MapPage = () => {
+
+Mapbox.setAccessToken(process.env.MAPBOX_API_TOKEN);
+
+function SearchBar({
+  onMyLocationPress, currentSearchAddress, onClearMarkers,
+}) {
+  const router = useRouter();
+
   return (
-    <View>
-      <Text>MapPage</Text>
+    <Box
+      safeAreaTop
+      position='absolute'
+      top='10px'
+      left='0'
+      h='10%'
+      zIndex={100}
+      w='100%'
+    >
+      <HStack h='48px' space='4' px='20px'>
+        <Button
+          flex='1'
+          variant='outline'
+          borderRadius={42}
+          bg='white'
+          borderWidth={1}
+          borderColor='#D7D9DA'
+          justifyContent='flex-start'
+          leftIcon={<SearchIcon size='md' color='black' />}
+          _text={{
+            color: '#5F6368',
+            fontWeight: 400,
+            fontSize: 'sm',
+            isTruncated: true,
+          }}
+          _pressed={{
+            bg: 'gray.100',
+          }}
+          onPress={() => {
+            if (onClearMarkers) onClearMarkers();
+            router.push('/map/search');
+          }}
+        >
+          <Text
+            pr='9'
+            color='#5F6368'
+            fontWeight='400'
+            fontSize='sm'
+            isTruncated
+          >
+            {currentSearchAddress || "Search"}
+          </Text>
+        </Button>
+        <IconButton
+          flex='1'
+          maxW='50px'
+          icon={<MaterialIcons name="my-location" size={24} color="#585858" />}
+          borderRadius={12}
+          bg='white'
+          _pressed={{
+            bg: 'gray.200',
+          }}
+          onPress={onMyLocationPress}
+        />
+      </HStack>
+    </Box>
+  );
+}
+
+function CurrentLocationMarker({ coordinate }) {
+  return (
+    <MarkerView
+      coordinate={coordinate}
+    >
+      <Circle
+        bg='rgba(0, 206, 209, 0.15)'
+        size='30px'
+      >
+        <Box
+          bg='cyan.400'
+          w='18px'
+          h='18px'
+          borderRadius='full'
+          borderWidth={3}
+          borderColor='white'
+        />
+      </Circle>
+    </MarkerView>
+  );
+}
+
+function LocationMarker({ coordinate }) {
+  return (
+    <MarkerView
+      coordinate={coordinate}
+    >
+      <IconButton
+        icon={<DefaultMarker size='lg' color="#000000" />}
+        size='xs'
+        _pressed={{
+          bg: "transparent",
+        }}
+      />
+    </MarkerView>
+  );
+}
+
+function LocationCard({ item }) {
+  return (
+    <Box
+      w='85%'
+      h='100px'
+      borderRadius={16}
+      position='absolute'
+      bottom='8'
+      bg='white'
+      left='8'
+      zIndex={100}
+      px='15px'
+      py='10px'
+    >
+      <VStack space={1}>
+        <Text
+          color='#593131'
+          fontSize='md'
+          fontWeight={400}
+        >
+          {item.address_line1}
+        </Text>
+        <Text isTruncated
+          color='#747688'
+          fontSize='xs'
+        >
+          {item.address_line2}
+        </Text>
+      </VStack>
+      <IconButton
+        position='absolute'
+        bottom='2'
+        right='2'
+        icon={<AddIcon size='sm' color='black' />}
+        size='sm'
+      />
+    </Box>
+  );
+}
+
+const MapPage = ({
+  centerCoordinate,
+}) => {
+  const tabBarHeight = useBottomTabBarHeight();
+
+  // camera config
+  const camera = useRef(null);
+
+  const { location } = useHomeLocationContext();
+  const currentCoords = useMemo(() => ([
+    location.coords.longitude, location.coords.latitude,
+  ]), [location]);
+
+  const toCurrentLocation = useCallback(() => {
+    camera.current?.setCamera({
+      zoomLevel: 17,
+      centerCoordinate: currentCoords,
+      animationDuration: 500,
+      animationMode: 'easeTo',
+    });
+  }, [currentCoords]);
+
+  const { markers, setMarkers } = useMarkerContext();
+  const [currentSelection, setCurrentSelection] = useState(0);
+  const selectedMarkersCoords = markers[currentSelection] ?
+    [markers[currentSelection]?.lon, markers[currentSelection]?.lat] :
+    null;
+
+  const centerCoords = centerCoordinate ||
+    selectedMarkersCoords || currentCoords;
+
+  return (
+    <View style={{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingBottom: tabBarHeight,
+    }}>
+      <SearchBar
+        onMyLocationPress={toCurrentLocation}
+        currentSearchAddress={markers[currentSelection]?.formatted}
+        onClearMarkers={() => setMarkers([])}
+      />
+      <View style={styles.mapContainer}>
+        <MapView
+          style={{
+            height: "100%",
+            width: '100%',
+          }}
+          compassEnabled={true}
+          compassPosition={{ top: 200, right: 20 }}
+          scaleBarPosition={{ bottom: 8, right: 0 }}
+        >
+          <Camera
+            ref={camera}
+            centerCoordinate={centerCoords}
+            zoomLevel={12}
+            animationDuration={300}
+            animationMode='easeTo'
+          />
+          <CurrentLocationMarker coordinate={currentCoords} />
+          {markers.map((marker, index) => {
+            return (<LocationMarker
+              key={index}
+              coordinate={[marker.lon, marker.lat]}
+            />);
+          })}
+        </MapView>
+        {markers[currentSelection] &&
+          <LocationCard item={markers[currentSelection]} />}
+      </View>
     </View>
   );
 };
 
 export default MapPage;
+
+const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mapContainer: {
+    height: '100%',
+    width: '100%',
+  },
+  map: {
+    flex: 1,
+  },
+});

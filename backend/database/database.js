@@ -13,7 +13,8 @@ const pool = mysql.createPool({
   connectionLimit: 15,
   ssl: {
     "rejectUnauthorized": true,
-  }
+  },
+  dateStrings: true,
 })
 
 exports.pool = pool;
