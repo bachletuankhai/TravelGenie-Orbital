@@ -292,7 +292,7 @@ const ChangeProfilePage = () => {
   return (
     <Center w="100%" bgColor='white'>
       <Box safeArea w="100%" maxW='420'>
-        <KeyboardAvoidingView behavior='padding'>
+        <KeyboardAvoidingView behavior='height'>
           <Title
             onBackPress={() => router.back()}
             onEditPress={handleEditPress}

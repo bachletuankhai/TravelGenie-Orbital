@@ -131,7 +131,6 @@ export default function ChangePassword() {
   const [isLoading, setIsLoading] = useState(false);
   const handleSubmit = useCallback(async () => {
     console.log("submit");
-    // TODO: setup api call to update password
     try {
       setIsLoading(true);
       const { error } = await changePassword(user.id, oldPassword, newPassword);
@@ -158,7 +157,7 @@ export default function ChangePassword() {
   return (
     <Center w="100%" bgColor='white'>
       <Box safeArea w="100%" maxW='420'>
-        <KeyboardAvoidingView behavior='padding'>
+        <KeyboardAvoidingView behavior='height'>
           <ScrollView w="100%" h="100%"
             _contentContainerStyle={{
               flexGrow: 1,
