@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-travelgenie-dev-170658-authRole",
+      "UnauthRoleArn": "arn:aws:iam::396145310381:role/amplify-travelgenie-dev-170658-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::396145310381:role/amplify-travelgenie-dev-170658-authRole",
+      "Region": "ap-southeast-1",
+      "DeploymentBucketName": "amplify-travelgenie-dev-170658-deployment",
+      "UnauthRoleName": "amplify-travelgenie-dev-170658-unauthRole",
+      "StackName": "amplify-travelgenie-dev-170658",
+      "StackId": "arn:aws:cloudformation:ap-southeast-1:396145310381:stack/amplify-travelgenie-dev-170658/aa3b5a40-2489-11ee-b895-02c7f8edd616",
+      "AmplifyAppId": "dslfjmwc6ev00"
+    }
+  }
+}
