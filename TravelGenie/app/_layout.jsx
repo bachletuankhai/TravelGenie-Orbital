@@ -28,6 +28,11 @@ import {
 import { AuthProvider } from '../contexts/auth';
 import { FirstLaunchProvider } from '../contexts/firstLaunch';
 
+// Amplify config
+import { Amplify } from 'aws-amplify';
+import awsExports from './src/aws-exports';
+Amplify.configure(awsExports);
+
 const fontConfig = {
   Poppins: {
     100: {
