@@ -10,6 +10,11 @@
       "StackName": "amplify-travelgenie-dev-170658",
       "StackId": "arn:aws:cloudformation:ap-southeast-1:396145310381:stack/amplify-travelgenie-dev-170658/aa3b5a40-2489-11ee-b895-02c7f8edd616",
       "AmplifyAppId": "dslfjmwc6ev00"
+    },
+    "categories": {
+      "auth": {
+        "TravelGenie": {}
+      }
     }
   }
 }

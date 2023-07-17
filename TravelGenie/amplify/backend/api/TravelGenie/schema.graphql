@@ -1,0 +1,27 @@
+type PlanItem @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  subtitle: String
+  date: AWSDate
+  start_time: AWSTime
+  end_time: AWSTime
+  place_id: String
+  longitude: Float
+  latitude: Float
+  created_at: AWSTimestamp
+  updated_at: AWSTimestamp
+  itineraryID: ID! @index(name: "byItinerary")
+}
+
+type Itinerary @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  start_date: AWSDate
+  end_date: AWSDate
+  location: String
+  user_id: String
+  created_at: AWSTimestamp
+  updated_at: AWSTimestamp
+  photo_url: AWSURL
+  PlanItems: [PlanItem] @hasMany(indexName: "byItinerary", fields: ["id"])
+}
