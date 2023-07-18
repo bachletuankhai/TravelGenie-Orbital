@@ -30,8 +30,10 @@ import { FirstLaunchProvider } from '../contexts/firstLaunch';
 
 // Amplify config
 import { Amplify } from 'aws-amplify';
-import awsExports from './src/aws-exports';
+import awsExports from '../aws-exports';
 Amplify.configure(awsExports);
+
+import 'core-js/full/symbol/async-iterator';
 
 const fontConfig = {
   Poppins: {
