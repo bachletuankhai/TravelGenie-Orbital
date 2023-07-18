@@ -17,7 +17,6 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRef } from 'react';
 import {
   SafeAreaProvider,
-  useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 
 const data = [
@@ -186,7 +185,11 @@ function ContentSelect({ currentSelection = "All", onChangeSelection }) {
 
 function SearchDiscover() {
   return (
-    <HStack direction='row-reverse' justifyContent='space-around' px='28px' mt='4'>
+    <HStack
+      direction='row-reverse'
+      justifyContent='space-around'
+      px='28px' mt='4'
+    >
       <IconButton
         variant='unstyled'
         icon={<FilterIcon color='#000000' size='xl' />}
@@ -238,7 +241,6 @@ const HEADER_HEIGHT = 160;
 
 function AnimatedHeader({ animatedValue }) {
   const minScroll = 100;
-  const { top } = useSafeAreaInsets();
   const clampedAnimatedValue = animatedValue.interpolate({
     inputRange: [minScroll, 1 + minScroll],
     outputRange: [0, 1],

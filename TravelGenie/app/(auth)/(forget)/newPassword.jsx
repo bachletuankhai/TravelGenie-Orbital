@@ -10,14 +10,14 @@ import {
   VStack,
 } from 'native-base';
 import { useCallback, useState } from 'react';
-import TitleHeader from '../TitleHeader';
+import TitleHeader from '../../../components/TitleHeader';
 import {
   checkPassword, useAuthContext,
-} from '../../contexts/auth';
+} from '../../../contexts/auth';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import BlueButton from '../BlueButton';
-import { changePassword } from '../../lib/authentication';
+import BlueButton from '../../../components/BlueButton';
+import { changePassword } from '../../../lib/authentication';
 import { Alert } from 'react-native';
 
 function Password({

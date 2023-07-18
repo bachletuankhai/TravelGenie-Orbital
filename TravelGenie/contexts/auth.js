@@ -11,6 +11,9 @@ import { handleLogin, handleRegister } from '../lib/connectBackend';
 import { Alert } from 'react-native';
 import { FirstLaunchContext } from './firstLaunch';
 
+import { Auth } from 'aws-amplify';
+import { signUp, signIn, signOut } from '../lib/authentication';
+
 export const AuthContext = createContext({});
 
 export function useAuthContext() {
@@ -60,12 +63,20 @@ export function loginAlert(msg) {
 }
 
 export function AuthProvider({ children }) {
+  // TODO: set up api call to update user info if user is saved
   const [user, setUser] = useState(null);
 
   const isLoggedIn = async () => {
     try {
-      const lastUser = await AsyncStorage.getItem('user');
-      setUser(JSON.parse(lastUser));
+      const session = await Auth.currentSession()
+          .then((session) => session || null);
+      console.log(`session: ${session}`);
+      if (session.isValid()) {
+        const user = await Auth.currentAuthenticatedUser({
+          bypassCache: true,
+        });
+        setUser(user);
+      }
     } catch (error) {
       console.log(`isLoggedIn error: ${error}`);
     }
@@ -73,10 +84,9 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      const { user, error } = await handleLogin(email, password);
+      const { user, error } = await signIn({ email, password });
       console.log(`Error: ${error}`);
       if (!error) {
-        await AsyncStorage.setItem('user', JSON.stringify(user));
         setUser(user);
       } else {
         console.log(`Login error: ${error}`);
@@ -90,14 +100,13 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     setUser(null);
-    await AsyncStorage.removeItem('user');
+    signOut();
   };
 
   const register = async (email, password) => {
     try {
-      const { user, error } = await handleRegister(email, password);
+      const { user, error } = await signUp({ email, password });
       if (!error) {
-        await AsyncStorage.setItem('user', JSON.stringify(user));
         setUser(user);
       } else {
         console.log(`Register error: ${error}`);

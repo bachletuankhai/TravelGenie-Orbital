@@ -19,7 +19,7 @@ import {
   checkEmail,
   loginAlert,
 } from '../../contexts/auth';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 function Header({ title }) {
   return (
@@ -101,17 +101,24 @@ function Password({ value, onChangeText }) {
           <EyeIcon isShown={show} onPress={() => setShow(!show)}/>
         }
       />
-      <Text
-        underline
-        color='greyText.400'
-        fontSize='md'
-        fontWeight='700'
-        alignSelf='flex-end'
-        mt='2'
-        mr='2'
+      <Box mt='1' w='100%' alignItems='flex-end'
+        _pressed={{
+          bg: 'grey.200',
+        }}
       >
-        Forget Password?
-      </Text>
+        <Link href={'/forgetpassword'}>
+          <Text
+            underline
+            color='greyText.400'
+            fontSize='md'
+            fontWeight='700'
+            mt='2'
+            mr='2'
+          >
+            Forget Password?
+          </Text>
+        </Link>
+      </Box>
     </FormControl>
   );
 }
@@ -164,7 +171,7 @@ export default function LoginPage() {
       } else {
         const { error } = await login(email, password);
         if (error) {
-          loginAlert(error);
+          loginAlert("Incorrect email and/or password.");
         }
       }
     } catch (error) {

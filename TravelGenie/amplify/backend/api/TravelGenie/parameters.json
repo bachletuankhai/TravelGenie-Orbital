@@ -2,7 +2,7 @@
   "AppSyncApiName": "TravelGenie",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
   "DynamoDBEnableServerSideEncryption": false,
-  "AuthModeLastUpdated": "2023-07-18T01:32:22.107Z",
+  "AuthModeLastUpdated": "2023-07-18T03:37:48.612Z",
   "AuthCognitoUserPoolId": {
     "Fn::GetAtt": [
       "authTravelGenie",
