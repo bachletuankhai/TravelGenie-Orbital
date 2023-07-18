@@ -6,6 +6,40 @@ import { LazyLoading, LazyLoadingDisabled, AsyncCollection } from "@aws-amplify/
 
 
 
+type EagerUser = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<User, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly email: string;
+  readonly name?: string | null;
+  readonly avatarUrl?: string | null;
+  readonly HasManyPlans?: (Itinerary | null)[] | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+type LazyUser = {
+  readonly [__modelMeta__]: {
+    identifier: ManagedIdentifier<User, 'id'>;
+    readOnlyFields: 'createdAt' | 'updatedAt';
+  };
+  readonly id: string;
+  readonly email: string;
+  readonly name?: string | null;
+  readonly avatarUrl?: string | null;
+  readonly HasManyPlans: AsyncCollection<Itinerary>;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
+}
+
+export declare type User = LazyLoading extends LazyLoadingDisabled ? EagerUser : LazyUser
+
+export declare const User: (new (init: ModelInit<User>) => User) & {
+  copyOf(source: User, mutator: (draft: MutableModel<User>) => MutableModel<User> | void): User;
+}
+
 type EagerPlanItem = {
   readonly [__modelMeta__]: {
     identifier: ManagedIdentifier<PlanItem, 'id'>;
@@ -69,6 +103,7 @@ type EagerItinerary = {
   readonly updated_at?: number | null;
   readonly photo_url?: string | null;
   readonly PlanItems?: (PlanItem | null)[] | null;
+  readonly userID: string;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -88,6 +123,7 @@ type LazyItinerary = {
   readonly updated_at?: number | null;
   readonly photo_url?: string | null;
   readonly PlanItems: AsyncCollection<PlanItem>;
+  readonly userID: string;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }

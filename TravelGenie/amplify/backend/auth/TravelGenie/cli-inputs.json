@@ -3,7 +3,7 @@
   "cognitoConfig": {
     "identityPoolName": "testAuthIdentityPool",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "travelc873cf52",
+    "resourceNameTruncated": "travelfdff28f2",
     "userPoolName": "TravelGenie",
     "autoVerifiedAttributes": [
       "email"
@@ -18,25 +18,18 @@
     "emailVerificationMessage": "Verification code: {####}",
     "defaultPasswordPolicy": false,
     "passwordPolicyMinLength": 8,
-    "passwordPolicyCharacters": [
-      "Requires Lowercase",
-      "Requires Numbers",
-      "Requires Symbols",
-      "Requires Uppercase"
-    ],
+    "passwordPolicyCharacters": [],
     "requiredAttributes": [
-      "name",
-      "email",
-      "picture"
+      "email"
     ],
     "aliasAttributes": [],
     "userpoolClientGenerateSecret": false,
     "userpoolClientRefreshTokenValidity": 30,
     "userpoolClientWriteAttributes": [],
     "userpoolClientReadAttributes": [],
-    "userpoolClientLambdaRole": "Travelc873cf52_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "Travelfdff28f2_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "c873cf52",
+    "sharedId": "fdff28f2",
     "resourceName": "TravelGenie",
     "authSelections": "identityPoolAndUserPool",
     "serviceName": "Cognito",

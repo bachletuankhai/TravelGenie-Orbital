@@ -1,4 +1,12 @@
-type PlanItem @model @auth(rules: [{allow: public}]) {
+type User @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  email: AWSEmail!
+  name: String
+  avatarUrl: AWSURL
+  HasManyPlans: [Itinerary] @hasMany(indexName: "byUser", fields: ["id"])
+}
+
+type PlanItem @model @auth(rules: [{allow: owner}]) {
   id: ID!
   name: String
   subtitle: String
@@ -13,7 +21,7 @@ type PlanItem @model @auth(rules: [{allow: public}]) {
   itineraryID: ID! @index(name: "byItinerary")
 }
 
-type Itinerary @model @auth(rules: [{allow: public}]) {
+type Itinerary @model @auth(rules: [{allow: owner}]) {
   id: ID!
   name: String
   start_date: AWSDate
@@ -24,4 +32,5 @@ type Itinerary @model @auth(rules: [{allow: public}]) {
   updated_at: AWSTimestamp
   photo_url: AWSURL
   PlanItems: [PlanItem] @hasMany(indexName: "byItinerary", fields: ["id"])
-}
+  userID: ID! @index(name: "byUser")
+} 
