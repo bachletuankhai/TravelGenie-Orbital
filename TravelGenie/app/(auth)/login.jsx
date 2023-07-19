@@ -187,6 +187,7 @@ export default function LoginPage() {
               justifyContent: 'space-between',
               flexDirection: 'column',
             }}
+            keyboardShouldPersistTaps='handled'
           >
             <Header title="Sign in"/>
 

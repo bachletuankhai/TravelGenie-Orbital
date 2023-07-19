@@ -274,6 +274,7 @@ export default function RegisterPage() {
               justifyContent: 'space-between',
               flexDirection: 'column',
             }}
+            keyboardShouldPersistTaps='handled'
           >
             <Header title="Sign up"/>
 
