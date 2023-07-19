@@ -19,6 +19,7 @@ import { Entypo } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { LocationIcon } from "../../assets/icons/itinerary";
 import axios from "axios";
+import { getItinerary } from "../../lib/itinerary";
 
 // TODO: add api call to update info
 
@@ -473,33 +474,39 @@ const data = [
   },
 ];
 
+const loadingStates = {
+  done: 0,
+  loading: 1,
+  error: -1,
+};
 export default function ItineraryView({ itemId }) {
   const tabBarHeight = useBottomTabBarHeight();
 
   const [planDetail, setPlanDetail] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadingState, setLoadingState] = useState(loadingStates.loading);
   const [realData, setRealData] = useState([]);
 
   useEffect(() => {
-    setIsLoading(true);
+    setLoadingState(loadingStates.loading);
     // TODO: use backend url in env
-    const api = "http://192.168.0.6:3000" + '/itineraries/' + itemId;
-    console.log(api);
-    axios.get(api)
+    getItinerary(itemId)
         .then((res) => res.data)
         .then((res) => {
           console.log(res.results.details);
           console.log(res.results.items);
           setPlanDetail(res.results.details);
           setRealData(res.results.items);
+          setLoadingState(loadingStates.done);
         })
-        .catch((err) => console.warn(err))
-        .then((x) => setIsLoading(false));
+        .catch((err) => {
+          console.warn(err);
+          setLoadingState(loadingStates.error);
+        });
   }, [itemId]);
 
   return (
     <Center w="100%" flex='1' bg='white'>
-      {!isLoading && <Box w="100%" flex='1'>
+      {loadingState == loadingStates.done && <Box w="100%" flex='1'>
         <Header
           currentDateSelection={planDetail.start_date}
           startDate={planDetail.start_date}

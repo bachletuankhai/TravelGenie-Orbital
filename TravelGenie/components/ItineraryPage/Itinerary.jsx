@@ -16,6 +16,7 @@ import ItineraryItemCard from './ItineraryItemCard';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { useAuthContext } from '../../contexts/auth';
+import { listItineraries } from '../../lib/itinerary';
 
 const sections = [
   {
@@ -172,14 +173,10 @@ const ItineraryPage = () => {
   const { user } = useAuthContext();
 
   const [realData, setRealData] = useState([]);
+  console.log(`loadingState: ${loadingState}`);
   useEffect(() => {
     setLoadingState(loadingStates.loading);
-    // TODO change back to use env url
-    const api = "http://192.168.0.6:3000" + '/itineraries/user/' + user?.id;
-    console.log(api);
-    axios.get(
-        api,
-    )
+    listItineraries(user?.id)
         .then((res) => res.data)
         .then((res) => {
           setRealData(res.results);

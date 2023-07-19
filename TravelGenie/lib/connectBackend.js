@@ -1,5 +1,7 @@
 import axios from "axios";
 axios.defaults.baseURL = process.env.BACKEND_URL;
+// axios.defaults.baseURL = "http://192.168.1.8:3000";
+const apiKey = process.env.BACKEND_API_KEY;
 
 export async function handleLogin(email, password) {
   try {
@@ -13,6 +15,7 @@ export async function handleLogin(email, password) {
         {
           headers: {
             'Content-Type': 'application/json',
+            'x-api-key': apiKey,
           },
         },
     );
@@ -20,6 +23,20 @@ export async function handleLogin(email, password) {
     return res.data;
   } catch (error) {
     console.log(`handleLogin error: ${error}`);
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+      return error.response.data;
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', error.message);
+    }
     return { error };
   }
 }
@@ -35,6 +52,7 @@ export async function handleRegister(email, password) {
         {
           headers: {
             'Content-Type': 'application/json',
+            'x-api-key': apiKey,
           },
         },
     );
@@ -70,7 +88,7 @@ export async function changeProfile(userId, data) {
     "avatarUrl",
     "email",
   ];
-  const apiRoute = `/user/${userId}`;
+  const apiRoute = `/user`;
   const ret = {
     ...data,
   };
@@ -80,8 +98,12 @@ export async function changeProfile(userId, data) {
           apiRoute + endPoints[key],
           data,
           {
+            params: {
+              'id': userId,
+            },
             headers: {
               'Content-Type': 'application/json',
+              'x-api-key': apiKey,
             },
           },
       );
@@ -97,13 +119,17 @@ export async function changeProfile(userId, data) {
 export async function changePassword(userId, oldPassword, newPassword) {
   try {
     const res = await axios.post(
-        `/user/${userId}/password`,
+        `/user/password`,
         {
           oldPassword,
           newPassword,
         },
         {
+          params: {
+            'id': userId,
+          },
           headers: {
+            'x-api-key': apiKey,
             'Content-Type': 'application/json',
           },
         },
@@ -131,7 +157,17 @@ export async function changePassword(userId, oldPassword, newPassword) {
 
 export async function deleteAccount(userId) {
   try {
-    await axios.delete(`/user/${userId}`);
+    await axios.delete(
+        `/user`,
+        {
+          params: {
+            'id': userId,
+          },
+          header: {
+            'x-api-key': apiKey,
+          },
+        },
+    );
     return {};
   } catch (error) {
     console.log(error);
