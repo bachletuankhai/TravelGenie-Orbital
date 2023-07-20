@@ -65,6 +65,7 @@ export function loginAlert(msg) {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const isLoggedIn = async () => {
     try {
@@ -75,6 +76,8 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       console.log(`isLoggedIn error: ${error}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
