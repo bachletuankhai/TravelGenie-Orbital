@@ -1,37 +1,30 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext } from "react";
+import _ from 'lodash';
 
 const StoreContext = createContext({
-  getItem,
-  setItem,
-  deleteItem,
+  getItem: () => {},
+  setItem: () => {},
+  deleteItem: () => {},
 });
 
 export function useStore() {
   return useContext(StoreContext);
 }
 
-export function StoreProvider({ children }) {
-  const [store, setStore] = useState({});
+const store = {};
 
+export function StoreProvider({ children }) {
   const getItem = useCallback((name) => {
     return store[name] || null;
-  }, [store]);
+  }, []);
 
   const setItem = useCallback((name, value) => {
-    const newStore = {
-      ...store,
-    };
-    newStore[name] = structuredClone(value);
-    setStore(newStore);
-  }, [store]);
+    store[name] = _.cloneDeep(value);
+  }, []);
 
   const deleteItem = useCallback((name) => {
-    const newStore = {
-      ...store,
-    };
-    delete newStore[name];
-    setStore(newStore);
-  }, [store]);
+    delete store[name];
+  }, []);
 
   return (
     <StoreContext.Provider value={{ getItem, setItem, deleteItem }}>
