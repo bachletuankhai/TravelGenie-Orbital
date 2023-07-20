@@ -4,6 +4,7 @@ export default function DiscoverLayout() {
   return (
     <Stack screenOptions={{
       headerShown: false,
+      freezeOnBlur: true,
     }}>
       <Stack.Screen
         name="index"
