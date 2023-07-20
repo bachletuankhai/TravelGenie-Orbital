@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl } from 'react-native';
 import Title from '../TitleHeader';
 import {
   Box,
@@ -10,13 +10,14 @@ import {
   WarningOutlineIcon,
   Text,
 } from 'native-base';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import ItineraryItemCard from './ItineraryItemCard';
 import { useRouter } from 'expo-router';
-import axios from 'axios';
 import { useAuthContext } from '../../contexts/auth';
 import { listItineraries } from '../../lib/itinerary';
+import { useStore } from '../../contexts/homeStore';
+import { useFocusEffect } from 'expo-router';
 
 const sections = [
   {
@@ -59,7 +60,7 @@ function Header({ currentSelection, onItemPress }) {
           alignSelf: 'center',
           lineHeight: 'sm',
         }}
-        onPress={onItemPress}
+        onPress={() => onItemPress(item.id)}
       >
         {item.title}
       </Button>
@@ -144,7 +145,7 @@ function ErrorPage(props) {
 
 function LoadingPage(props) {
   return (
-    <Box>
+    <Box {...props} alignItems='center' justifyContent='center'>
       <ActivityIndicator />
     </Box>
   );
@@ -155,10 +156,19 @@ const loadingStates = {
   loading: 1,
   error: -1,
 };
+const selections = [
+  'ACTIVE',
+  'PAST',
+  'CANCELLED',
+];
 const ItineraryPage = () => {
   const [currentSelection, setCurrentSelection] = useState(0);
   const [loadingState, setLoadingState] = useState(loadingStates.done);
   const router = useRouter();
+
+  const onHeaderItemPress = useCallback((id) => {
+    setCurrentSelection(id);
+  }, [setCurrentSelection]);
 
   const render = useCallback(({ item }) => {
     return (
@@ -171,34 +181,48 @@ const ItineraryPage = () => {
   }, [router]);
 
   const { user } = useAuthContext();
+  const store = useStore();
 
-  const [realData, setRealData] = useState([]);
-  console.log(`loadingState: ${loadingState}`);
-  useEffect(() => {
+  const refreshData = useCallback(() => {
     setLoadingState(loadingStates.loading);
     listItineraries(user?.id)
-        .then((res) => res.data)
-        .then((res) => {
-          setRealData(res.results);
-          return res.results;
-        })
         .then((res) => {
           console.log(res);
+          setRealData(res);
           setLoadingState(loadingStates.done);
+          store.setItem('ItineraryList', res);
         })
         .catch((err) => {
           console.warn(err);
           setLoadingState(loadingStates.error);
         });
-  }, [user]);
+  }, [user, store]);
+
+  const [realData, setRealData] = useState([]);
+  useFocusEffect(
+      useCallback(() => {
+        setLoadingState(loadingStates.loading);
+        const list = store.getItem('ItineraryList');
+        console.log(list);
+        if (!list) {
+          refreshData();
+        } else {
+          setRealData(list);
+          setLoadingState(loadingStates.done);
+        }
+      }, [store, refreshData]),
+  );
 
   const paddingBottom = useBottomTabBarHeight();
+  const displayData = realData.filter((item) =>
+    item.status == selections[currentSelection]);
 
   return (
     <Center safeAreaTop w='100%' flex='1' bg='white'>
       <Box w='100%' safeAreaLeft safeAreaRight flex='1'>
         <Header
           currentSelection={currentSelection}
+          onItemPress={onHeaderItemPress}
         />
         <AddButton
           onPress={() => router.push('/newtrip')}
@@ -213,8 +237,15 @@ const ItineraryPage = () => {
             paddingTop: HEADER_HEIGHT + 15,
             paddingHorizontal: 20,
           }}
-          data={realData}
+          data={displayData}
           renderItem={render}
+          refreshControl={
+            <RefreshControl
+              progressViewOffset={HEADER_HEIGHT}
+              refreshing={loadingState == loadingStates.loading}
+              onRefresh={refreshData}
+            />
+          }
         />}
         {loadingState == loadingStates.error && <ErrorPage />}
         {loadingState == loadingStates.loading && <LoadingPage />}
