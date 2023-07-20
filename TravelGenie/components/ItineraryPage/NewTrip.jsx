@@ -10,7 +10,7 @@ import {
   Modal,
   Pressable,
 } from "native-base";
-import { Image, Platform } from "react-native";
+import { Alert, Image, Platform } from "react-native";
 import Title from "../TitleHeader";
 import InputWithLabel from "../InputWithLabel";
 import BlueButton from "../BlueButton";
@@ -18,6 +18,9 @@ import { useCallback, useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import * as ImagePicker from 'expo-image-picker';
+import { useAuthContext } from "../../contexts/auth";
+import { createItinerary } from "../../lib/itinerary";
+import { useRouter } from "expo-router";
 
 function CoverImage({ isPressed, src }) {
   return (
@@ -60,7 +63,7 @@ function CoverImageButton({ photoUrl, onPress, ...props }) {
         </VStack>
       </Box>
     );
-  }, [props]);
+  }, []);
 
   const withUrl = useCallback(({ isPressed }) => {
     return (
@@ -120,6 +123,8 @@ function DatePicker({ fromDate, toDate, setFromDate, setToDate }) {
         onChange: (event, selectedDate) =>
           handleDateChangeAndroid(event, selectedDate, currentMode),
         mode: "date",
+        minimumDate: (currentMode == 'from' ? undefined :
+          fromDate || new Date()),
       });
     }
   }, [mode, fromDate, toDate, handleDateChangeAndroid]);
@@ -172,6 +177,7 @@ function DatePicker({ fromDate, toDate, setFromDate, setToDate }) {
               fontWeight: '400',
             }}
             onPress={() => onDatePress('to')}
+            isDisabled={fromDate ? false : true}
           >
             {toDate?.toLocaleDateString() || "To date"}
           </Button>
@@ -217,6 +223,13 @@ function DatePickModalIOS({
   );
 }
 
+function toDateString(date) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year}-${month}-${day}`;
+}
+
 const HEADER_HEIGHT = 50;
 export default function NewTrip() {
   const [name, setName] = useState('');
@@ -239,7 +252,63 @@ export default function NewTrip() {
       setPhotoUrl(results.assets[0].uri);
     }
   }, []);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
+  const submitDisabled = !fromDate || !toDate || !photoUrl || !name ||
+   !destination;
+  const { user } = useAuthContext();
+  const submit = useCallback(() => {
+    setIsLoading(true);
+    let imageLink = null;
+    const data = new FormData();
+    data.append('image', imageData);
+    data.append('name', "user-avatar-" + user.id);
+    fetch(process.env.IMAGE_UPLOAD_URL, {
+      method: 'post',
+      headers: {
+        Authorization: "Client-ID " + process.env.IMGUR_CLIENT_ID,
+      },
+      body: data,
+    }).then((res) => res.json()).then((res) => {
+      imageLink = res.data.link;
+      console.log(imageLink);
+      return imageLink;
+    }).then((link) => {
+      createItinerary(
+          user?.id,
+          name,
+          toDateString(fromDate),
+          toDateString(toDate),
+          destination,
+          link,
+      )
+          .then((res) => router.back())
+          .catch((err) => {
+            console.log("CreateItinerary error " + err.message);
+            Alert.alert('Failed to create new trip',
+                'An error has occured. Please try again.',
+                [{
+                  text: 'OK',
+                  onPress: () => {},
+                }],
+            );
+          });
+    }).then((res) => {
+      listItineraries(user?.id)
+          .then((res) => {
+            console.log(res);
+            store.setItem('ItineraryList', res);
+          })
+          .catch((err) => {
+            console.warn(err);
+          });
+    }).catch((err) => {
+      console.log("image loading error: " + err.message);
+    }).finally(() => {
+      setIsLoading(false);
+    });
+  }, [user, name, fromDate, toDate, destination, router, imageData]);
   return (
     <Center w='100%' bg='white'>
       <Box w='100%' safeArea>
@@ -269,11 +338,15 @@ export default function NewTrip() {
                 mt='3'
               />
               <InputWithLabel
+                value={name}
+                onChangeText={setName}
                 label="Trip name"
                 placeholder="Trip name"
                 type='text'
               />
               <InputWithLabel
+                value={destination}
+                onChangeText={setDestination}
                 label="Destination"
                 placeholder="Enter city/country"
                 type='text'
@@ -285,8 +358,12 @@ export default function NewTrip() {
                 setToDate={setToDate}
               />
               <BlueButton
+                isLoading={isLoading}
+                loadingText={'Create New Trip'}
                 mt='35px'
                 title='Create New Trip'
+                isDisabled={submitDisabled}
+                onPress={submit}
               />
             </VStack>
           </ScrollView>
