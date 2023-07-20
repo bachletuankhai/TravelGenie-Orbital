@@ -7,7 +7,11 @@ import {
 } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { handleLogin, handleRegister } from '../lib/connectBackend';
+import {
+  handleLogin,
+  handleRegister,
+  retrieveCurrentUser,
+} from '../lib/connectBackend';
 import { Alert } from 'react-native';
 import { FirstLaunchContext } from './firstLaunch';
 
@@ -64,8 +68,11 @@ export function AuthProvider({ children }) {
 
   const isLoggedIn = async () => {
     try {
-      const lastUser = await AsyncStorage.getItem('user');
-      setUser(JSON.parse(lastUser));
+      const lastUser = JSON.parse(await AsyncStorage.getItem('user'));
+      if (lastUser) {
+        const currentUser = await retrieveCurrentUser(lastUser.id);
+        setUser(currentUser);
+      }
     } catch (error) {
       console.log(`isLoggedIn error: ${error}`);
     }

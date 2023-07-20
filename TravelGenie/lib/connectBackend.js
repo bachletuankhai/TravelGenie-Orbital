@@ -174,3 +174,37 @@ export async function deleteAccount(userId) {
     return { error: error.message || error };
   }
 }
+
+export async function retrieveCurrentUser(userId) {
+  try {
+    const res = await axios.get(
+        '/user',
+        {
+          params: {
+            'id': userId,
+          },
+          headers: {
+            'x-api-key': apiKey,
+          },
+        },
+    );
+    return res.data.user;
+  } catch (error) {
+    console.log(`retrieveCurrentUser error: ${error}`);
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+      return error.response.data;
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', error.message);
+    }
+    return { error };
+  }
+}
