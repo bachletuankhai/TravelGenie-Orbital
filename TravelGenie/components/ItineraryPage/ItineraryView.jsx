@@ -14,12 +14,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View, useWindowDimensions,
 } from 'react-native';
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Entypo } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { LocationIcon } from "../../assets/icons/itinerary";
 import axios from "axios";
 import { getItinerary } from "../../lib/itinerary";
+import { useStore } from "../../contexts/homeStore";
 
 // TODO: add api call to update info
 
@@ -485,24 +486,39 @@ export default function ItineraryView({ itemId }) {
   const [planDetail, setPlanDetail] = useState(null);
   const [loadingState, setLoadingState] = useState(loadingStates.loading);
   const [realData, setRealData] = useState([]);
+  const store = useStore();
 
-  useEffect(() => {
-    setLoadingState(loadingStates.loading);
-    // TODO: use backend url in env
-    getItinerary(itemId)
-        .then((res) => res.data)
-        .then((res) => {
-          console.log(res.results.details);
-          console.log(res.results.items);
-          setPlanDetail(res.results.details);
-          setRealData(res.results.items);
+  useFocusEffect(
+      useCallback(() => {
+        setLoadingState(loadingStates.loading);
+        const cachedPlanDetail = store.getItem('ItineraryList')
+            .filter((item) => item.id == itemId)[0];
+        setPlanDetail(cachedPlanDetail);
+        const planItems = store.getItem(`Itinerary-${itemId}-Items`);
+        if (!planItems) {
+          getItinerary(itemId)
+              .then((res) => res.data)
+              .then((res) => {
+                console.log(res.results.details);
+                console.log(res.results.items);
+                // save to global store
+                store.setItem(`Itinerary-${itemId}-Items`, res.results.items);
+                // set display data
+                setPlanDetail(cachedPlanDetail);
+                setRealData(res.results.items);
+                setLoadingState(loadingStates.done);
+              })
+              .catch((err) => {
+                console.warn(err);
+                setLoadingState(loadingStates.error);
+              });
+        } else {
+          setPlanDetail(cachedPlanDetail);
+          setRealData(planItems);
           setLoadingState(loadingStates.done);
-        })
-        .catch((err) => {
-          console.warn(err);
-          setLoadingState(loadingStates.error);
-        });
-  }, [itemId]);
+        }
+      }, [itemId, store]),
+  );
 
   return (
     <Center w="100%" flex='1' bg='white'>
