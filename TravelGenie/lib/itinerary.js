@@ -8,19 +8,24 @@ export async function listItineraries(userId) {
   }
   const api = '/itinerary/user/';
   console.log(axios.defaults.baseURL + api);
-  return await axios.get(
-      api,
-      {
-        params: {
-          'id': userId,
+  try {
+    const res = await axios.get(
+        api,
+        {
+          params: {
+            'id': userId,
+          },
+          headers: {
+            'x-api-key': process.env.BACKEND_API_KEY,
+          },
+          timeout: 10000,
+          timeoutErrorMessage: "Network Error",
         },
-        headers: {
-          'x-api-key': process.env.BACKEND_API_KEY,
-        },
-        timeout: 10000,
-        timeoutErrorMessage: "Network Error",
-      },
-  );
+    );
+    return res.data?.results;
+  } catch (error) {
+    console.log("listItineraries error: " + error.message);
+  }
 }
 
 export async function getItinerary(itemId) {
@@ -39,4 +44,56 @@ export async function getItinerary(itemId) {
     timeout: 10000,
     timeoutErrorMessage: "Network Error",
   });
+}
+
+export async function createItinerary(
+    userId,
+    name,
+    startDate,
+    endDate,
+    location,
+    photoUrl,
+) {
+  const api = '/itinerary';
+  try {
+    const res = await axios.post(
+        api,
+        {
+          userId,
+          name,
+          startDate,
+          endDate,
+          location,
+          photoUrl,
+        },
+        {
+          headers: {
+            'x-api-key': process.env.BACKEND_API_KEY,
+          },
+          timeout: 10000,
+          timeoutErrorMessage: "Network Error",
+        });
+    if (res.data.error) {
+      throw new Error(error);
+    } else {
+      return res.data;
+    }
+  } catch (error) {
+    console.log(`createItinerary error: ${error}`);
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+      return error.response.data;
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', error.message);
+    }
+    return { error };
+  }
 }
