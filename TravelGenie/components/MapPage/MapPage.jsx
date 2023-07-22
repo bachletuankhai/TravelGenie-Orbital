@@ -22,6 +22,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { DefaultMarker } from '../../assets/icons/map';
 import { useRouter } from 'expo-router';
 import { useMarkerContext } from '../../contexts/mapMarkers';
+import { useStore } from '../../contexts/homeStore';
 
 
 Mapbox.setAccessToken(process.env.MAPBOX_API_TOKEN);
@@ -119,7 +120,7 @@ function LocationMarker({ coordinate }) {
       coordinate={coordinate}
     >
       <IconButton
-        icon={<DefaultMarker size='lg' color="#000000" />}
+        icon={<DefaultMarker size='lg' color="#a50000" />}
         size='xs'
         _pressed={{
           bg: "transparent",
@@ -129,7 +130,7 @@ function LocationMarker({ coordinate }) {
   );
 }
 
-function LocationCard({ item }) {
+function LocationCard({ item, onAddPress }) {
   return (
     <Box
       w='85%'
@@ -143,25 +144,39 @@ function LocationCard({ item }) {
       px='15px'
       py='10px'
     >
-      <VStack space={1}>
-        <Text
-          color='#593131'
-          fontSize='md'
-          fontWeight={400}
+      <HStack space='2' flex='1' mr='5'>
+        <Box
+          width='70px'
+          bg='gray.200'
         >
-          {item.address_line1}
-        </Text>
-        <Text isTruncated
-          color='#747688'
-          fontSize='xs'
-        >
-          {item.address_line2}
-        </Text>
-      </VStack>
+        </Box>
+        <VStack space={1} flex='1'>
+          <Text
+            width='100%'
+            color='#593131'
+            fontSize='md'
+            fontWeight={400}
+          >
+            {item.address_line1}
+          </Text>
+          <Text isTruncated
+            width='100%'
+            color='#747688'
+            fontSize='xs'
+          >
+            {item.address_line2}
+          </Text>
+        </VStack>
+      </HStack>
       <IconButton
+        onPress={() => onAddPress(item)}
         position='absolute'
         bottom='2'
         right='2'
+        borderRadius='full'
+        _pressed={{
+          bg: 'gray.200',
+        }}
         icon={<AddIcon size='sm' color='black' />}
         size='sm'
       />
@@ -199,7 +214,12 @@ const MapPage = ({
 
   const centerCoords = centerCoordinate ||
     selectedMarkersCoords || currentCoords;
-
+  const store = useStore();
+  const router = useRouter();
+  const onAddPress = useCallback((item) => {
+    store.setItem('NewPlanPlace', item);
+    router.push("/newitem");
+  }, [store, router]);
   return (
     <View style={{
       flex: 1,
@@ -238,7 +258,9 @@ const MapPage = ({
           })}
         </MapView>
         {markers[currentSelection] &&
-          <LocationCard item={markers[currentSelection]} />}
+          <LocationCard item={markers[currentSelection]}
+            onAddPress={onAddPress}
+          />}
       </View>
     </View>
   );
