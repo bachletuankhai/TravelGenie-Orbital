@@ -9,20 +9,30 @@ import {
   ArrowBackIcon,
   IconButton,
   Button,
+  AddIcon,
 } from "native-base";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  RefreshControl,
   View, useWindowDimensions,
 } from 'react-native';
 import { useFocusEffect, useRouter } from "expo-router";
 import { Entypo } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { LocationIcon } from "../../assets/icons/itinerary";
-import axios from "axios";
 import { getItinerary } from "../../lib/itinerary";
 import { useStore } from "../../contexts/homeStore";
 
 // TODO: add api call to update info
+
+function toDateString(date) {
+  const year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  if (month < 10) month = `0${month}`;
+  let day = date.getDate();
+  if (day < 10) day = `0${day}`;
+  return `${year}-${month}-${day}`;
+}
 
 function CalendarItemCard({
   isSelected=false, isOutOfRange, dayOfWeek, date, onPress,
@@ -58,7 +68,7 @@ function CalendarItemCard({
     );
   }, [isSelected, isOutOfRange, date, dayOfWeek]);
   return (
-    <Pressable onPress={onPress} flex='1' mx='2'>
+    <Pressable onPress={onPress} flex='1' mx='2' isDisabled={isOutOfRange}>
       {render}
     </Pressable>
   );
@@ -68,52 +78,19 @@ const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 // date is passed as string
 function WeekCalendar({
-  firstDayOfWeek, startDate, endDate, currentSelection, onDatePress,
+  data, onDatePress, width,
 }) {
-  const { width, height } = useWindowDimensions();
-  console.log(`current: ${currentSelection}`);
-  const days = useMemo(() => {
-    const week = [0, 1, 2, 3, 4, 5, 6];
-    const days = week.map((date) => {
-      const firstDay = new Date(firstDayOfWeek);
-      firstDay.setDate(firstDay.getDate() + date);
-      return firstDay;
-    });
-    return days;
-  }, [firstDayOfWeek]);
-
-  const start = useMemo(() => {
-    return new Date(startDate).getTime();
-  }, [startDate]);
-
-  const end = useMemo(() => {
-    return new Date(endDate).getTime();
-  }, [endDate]);
-
-  const currentDateSelection = useMemo(() => new Date(currentSelection),
-      [currentSelection]);
-
-  const currentDateSelectionTime = useMemo(() =>
-    currentDateSelection.getTime(),
-  [currentDateSelection]);
-
-
-  // console.log(`start: ${start} ` + startDate);
-  // console.log(`end: ${end} ` + endDate);
-
   return (
     <Box w={width} alignItems='center'>
       <HStack w='100%' justifyContent='space-around' px='15px'>
-        {days.map((day, index) => {
-          const time = day.getTime();
-          {/* console.log(`current: ${time} ` + day); */}
+        {data.map((dayData) => {
           return <CalendarItemCard
-            key={index}
-            dayOfWeek={weekdays[index]}
-            date={day.getDate()}
-            isSelected={time == currentDateSelectionTime}
-            isOutOfRange={time < start || time > end}
-            onPress={onDatePress}
+            key={dayData.key}
+            dayOfWeek={dayData.dayOfWeek}
+            date={dayData.date}
+            isSelected={dayData.isSelected}
+            isOutOfRange={dayData.isOutOfRange}
+            onPress={() => onDatePress(dayData.dateString)}
           />;
         })}
       </HStack>
@@ -191,19 +168,21 @@ function getFirstDayOfWeek(currentDate) {
 
 // TODO: add function to switch to specified day and extend the plan
 const HEADER_HEIGHT = 230;
-function Header({ currentDateSelection, startDate, endDate }) {
+function Header({
+  currentDateSelection, startDate, endDate, onDatePress, title,
+}) {
   // generate week range consisting start date and end date
   console.log(`current date: ${currentDateSelection}`);
+
   const weeks = useMemo(() => {
     const weeks = [];
+    const startTime = new Date(startDate).getTime();
     const endTime = new Date(endDate).getTime();
     const startFirstDayOfWeek = getFirstDayOfWeek(new Date(startDate));
     let id = 0;
     while (startFirstDayOfWeek.getTime() <= endTime) {
-      const year = startFirstDayOfWeek.getFullYear();
-      const month = startFirstDayOfWeek.getMonth() + 1;
+      const firstDayOfWeekStr = toDateString(startFirstDayOfWeek);
       const day = startFirstDayOfWeek.getDate();
-      const firstDayOfWeekStr = `${year}-${month}-${day}`;
       weeks.push({
         id,
         firstDayOfWeek: firstDayOfWeekStr,
@@ -211,23 +190,47 @@ function Header({ currentDateSelection, startDate, endDate }) {
       startFirstDayOfWeek.setDate(day + 7);
       id += 1;
     }
-    return weeks;
+    console.log(weeks);
+    const week = [0, 1, 2, 3, 4, 5, 6];
+    const allDays = weeks.map((w) => week.map((date, index) => {
+      const firstDay = new Date(w.firstDayOfWeek);
+      firstDay.setDate(firstDay.getDate() + date);
+
+      const time = firstDay.getTime();
+      return {
+        key: index,
+        dayOfWeek: weekdays[index],
+        date: firstDay.getDate(),
+        isOutOfRange: time < startTime || endTime > endTime,
+        dateString: toDateString(firstDay),
+      };
+    }));
+    return allDays;
   }, [startDate, endDate]);
 
-  console.log(weeks);
-  console.log(currentDateSelection);
+  const weeksWithSelection = useMemo(() => {
+    return weeks.map((week) => week.map((dayData) => {
+      return {
+        ...dayData,
+        isSelected: currentDateSelection == dayData.dateString,
+      };
+    }));
+  }, [weeks, currentDateSelection]);
+
+  const { width } = useWindowDimensions();
+
+
+  // console.log(currentDateSelection);
 
   const weekCalendarRender = useCallback(({ item }) => {
     return (
       <WeekCalendar
-        firstDayOfWeek={item.firstDayOfWeek}
-        startDate={startDate}
-        endDate={endDate}
-        currentSelection={currentDateSelection}
-        onDatePress={() => {}}
+        data={item}
+        onDatePress={onDatePress}
+        width={width}
       />
     );
-  }, [currentDateSelection, startDate, endDate]);
+  }, [onDatePress, width]);
 
   const calendarFlatListRef = useRef(null);
 
@@ -243,20 +246,17 @@ function Header({ currentDateSelection, startDate, endDate }) {
     >
       <VStack space={6}>
         <Title
-          title="Itinerary"
+          title={title}
         />
         <Box alignItems='center' w='100%' zIndex={100}>
           <FlatList
             ref={calendarFlatListRef}
             horizontal={true}
-            data={weeks}
+            data={weeksWithSelection}
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             renderItem={weekCalendarRender}
-            viewabilityConfig={{
-              minimumViewTime: 1,
-              itemVisiblePercentThreshold: 60,
-            }}
+            initialNumToRender={2}
           />
         </Box>
       </VStack>
@@ -302,6 +302,10 @@ function Header({ currentDateSelection, startDate, endDate }) {
 function LocationItemCard({ item }) {
   // TODO: add edit function
   // TODO: add link to map view
+  const startTimeArr = item.start_time.split(":");
+  const startTime = `${startTimeArr[0]}:${startTimeArr[1]}`;
+  const endTimeArr = item.end_time.split(":");
+  const endTime = `${endTimeArr[0]}:${endTimeArr[1]}`;
   return (
     <HStack h='120px' w='100%'>
       <Box
@@ -320,7 +324,7 @@ function LocationItemCard({ item }) {
             fontSize='md'
             color='#212525'
           >
-            {item.start_time}
+            {startTime}
           </Text>
           <Text
             textAlign='right'
@@ -328,7 +332,7 @@ function LocationItemCard({ item }) {
             fontSize='sm'
             color='#BCC1CD'
           >
-            {item.end_time}
+            {endTime}
           </Text>
         </VStack>
       </Box>
@@ -392,109 +396,60 @@ function LocationItemCard({ item }) {
   );
 }
 
-const data = [
-  {
-    id: 0,
-    name: "Hotel",
-    subtitle: "Breakfast",
-    startTime: "8:35",
-    endTime: "9:00",
-    date: "2023-01-23",
-  },
-  {
-    id: 1,
-    name: "Science & Art Museum",
-    subtitle: "Museum",
-    startTime: "9:15",
-    endTime: "11:10",
-    date: "2023-01-23",
-  },
-  {
-    id: 2,
-    name: "NUS",
-    subtitle: "Visiting",
-    startTime: "11:10",
-    endTime: "12:30",
-    date: "2023-01-23",
-  },
-  {
-    id: 3,
-    name: "Universal Studio",
-    subtitle: "Theme Park",
-    startTime: "13:00",
-    endTime: "17:00",
-    date: "2023-01-23",
-  },
-  {
-    id: 4,
-    name: "KFC",
-    subtitle: "Lunch",
-    startTime: "11:00",
-    endTime: "12:00",
-    date: "2023-01-24",
-  },
-  {
-    id: 5,
-    name: "Movie Theater name",
-    subtitle: "Cinema",
-    startTime: "13:00",
-    endTime: "15:00",
-    date: "2023-01-24",
-  },
-  {
-    id: 7,
-    name: "Clementi Mall",
-    subtitle: "Shopping",
-    startTime: "15:00",
-    endTime: "17:00",
-    date: "2023-01-24",
-  },
-  {
-    id: 6,
-    name: "Hadilao",
-    subtitle: "Dinner",
-    startTime: "18:00",
-    endTime: "20:00",
-    date: "2023-01-24",
-  },
-  {
-    id: 8,
-    name: "Hotel",
-    subtitle: "Checkout",
-    startTime: "7:00",
-    endTime: "7:15",
-    date: "2023-01-25",
-  },
-  {
-    id: 9,
-    name: "Hotel",
-    subtitle: "Checkin",
-    startTime: "7:00",
-    endTime: "7:15",
-    date: "2023-01-23",
-  },
-];
+function AddButton({ onPress, ...props }) {
+  return (
+    <Box
+      h='56px'
+      w='56px'
+      borderRadius='full'
+      alignItems='center'
+      justifyContent='center'
+      {...props}
+    >
+      <IconButton
+        icon={<AddIcon size='md' color="white" />}
+        size='lg'
+        w='100%'
+        h='100%'
+        borderRadius='full'
+        bgColor='primary.400'
+        onPress={onPress}
+        _pressed={{
+          bg: 'primary.700',
+        }}
+      />
+    </Box>
+  );
+}
 
 const loadingStates = {
   done: 0,
   loading: 1,
   error: -1,
 };
-export default function ItineraryView({ itemId }) {
+export default function ItineraryView() {
   const tabBarHeight = useBottomTabBarHeight();
+
+  const [itemId, setItemId] = useState(null);
 
   const [planDetail, setPlanDetail] = useState(null);
   const [loadingState, setLoadingState] = useState(loadingStates.loading);
   const [realData, setRealData] = useState([]);
   const store = useStore();
+  const [currentDateSelection, setCurrentDateSelection] =
+    useState(null);
 
   useFocusEffect(
       useCallback(() => {
         setLoadingState(loadingStates.loading);
+        const itemId = store.getItem('CurrentItineraryId');
+        setItemId(itemId);
         const cachedPlanDetail = store.getItem('ItineraryList')
             .filter((item) => item.id == itemId)[0];
         setPlanDetail(cachedPlanDetail);
         const planItems = store.getItem(`Itinerary-${itemId}-Items`);
+        const cachedCurrentDateSelection =
+          store.getItem('CurrentDateSelection');
         if (!planItems) {
           getItinerary(itemId)
               .then((res) => res.data)
@@ -506,6 +461,7 @@ export default function ItineraryView({ itemId }) {
                 // set display data
                 setPlanDetail(cachedPlanDetail);
                 setRealData(res.results.items);
+                setCurrentDateSelection(cachedPlanDetail.start_date);
                 setLoadingState(loadingStates.done);
               })
               .catch((err) => {
@@ -514,29 +470,82 @@ export default function ItineraryView({ itemId }) {
               });
         } else {
           setPlanDetail(cachedPlanDetail);
+          setCurrentDateSelection(cachedCurrentDateSelection);
           setRealData(planItems);
           setLoadingState(loadingStates.done);
         }
-      }, [itemId, store]),
+      }, [store]),
   );
+
+  const onDatePress = useCallback((dayString) => {
+    setCurrentDateSelection(dayString);
+  }, [setCurrentDateSelection]);
+
+  const router = useRouter();
+
+  const onAddPress = useCallback(() => {
+    // set the current selected date
+    store.setItem('CurrentDateSelection', currentDateSelection);
+    // set the current pending place to undefined
+    store.deleteItem('NewPlanPlace');
+    router.push("/newitem");
+  }, [store, router, currentDateSelection]);
+
+  const displayData = realData.filter((item) =>
+    item.date == currentDateSelection);
+
+  const refreshData = useCallback(() => {
+    setLoadingState(loadingStates.loading);
+    getItinerary(itemId)
+        .then((res) => res.data)
+        .then((res) => {
+          console.log(res.results.details);
+          console.log(res.results.items);
+          // save to global store
+          store.setItem(`Itinerary-${itemId}-Items`, res.results.items);
+          // set display data
+          setRealData(res.results.items);
+          setLoadingState(loadingStates.done);
+        })
+        .catch((err) => {
+          console.warn(err);
+          setLoadingState(loadingStates.error);
+        });
+  }, [itemId, store]);
 
   return (
     <Center w="100%" flex='1' bg='white'>
       {loadingState == loadingStates.done && <Box w="100%" flex='1'>
         <Header
-          currentDateSelection={planDetail.start_date}
-          startDate={planDetail.start_date}
-          endDate={planDetail.end_date}
+          title={planDetail?.name || "Itinerary"}
+          currentDateSelection={currentDateSelection}
+          startDate={planDetail?.start_date}
+          endDate={planDetail?.end_date}
+          onDatePress={onDatePress}
         />
         <FlatList
-          data={realData}
+          data={displayData}
           renderItem={LocationItemCard}
           contentContainerStyle={{
             flexGrow: 0,
             paddingTop: HEADER_HEIGHT,
             paddingBottom: tabBarHeight + 10,
             paddingHorizontal: 28,
+            height: '100%',
+            backgroundColor: "#edecca",
           }}
+          refreshControl={<RefreshControl
+            progressViewOffset={HEADER_HEIGHT}
+            refreshing={loadingState == loadingStates.loading}
+            onRefresh={refreshData}
+          />}
+        />
+        <AddButton
+          onPress={onAddPress}
+          position='absolute'
+          bottom={tabBarHeight + 11}
+          right='27'
+          zIndex={13}
         />
       </Box>}
     </Center>
