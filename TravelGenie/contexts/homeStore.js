@@ -15,7 +15,7 @@ const store = {};
 
 export function StoreProvider({ children }) {
   const getItem = useCallback((name) => {
-    return store[name] || null;
+    return _.cloneDeep(store[name]) || null;
   }, []);
 
   const setItem = useCallback((name, value) => {
