@@ -10,7 +10,7 @@ export default function DiscoverLayout() {
         name="index"
       />
       <Stack.Screen
-        name="view/[id]"
+        name="view/view"
       />
     </Stack>
   );
