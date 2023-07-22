@@ -12,13 +12,13 @@ import {
 } from 'native-base';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { DefaultMarker } from '../../assets/icons/map';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import axios from 'axios';
 import { useMarkerContext } from '../../contexts/mapMarkers';
 
-const SearchBar = forwardRef(function SearchBar({ value, onChangeText, onBackPress }, ref) {
+const SearchBar = forwardRef(function SearchBar({ value, onChangeText, onBackPress, onClearPress }, ref) {
   return (
     <Box w='100%'
       borderRadius={42}
@@ -53,6 +53,17 @@ const SearchBar = forwardRef(function SearchBar({ value, onChangeText, onBackPre
           }}
           value={value} ref={ref}
         />
+        {value != '' && <Box justifyContent='center' alignItems='flex-end'>
+          <IconButton
+            icon={<Ionicons name="close-circle" size={18} color="black" />}
+            size='sm'
+            borderRadius='full'
+            _pressed={{
+              bg: 'gray.200',
+            }}
+            onPress={onClearPress}
+          />
+        </Box>}
       </HStack>
     </Box>
   );
@@ -135,14 +146,16 @@ const SearchPage = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const id = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
-    return () => {
-      clearTimeout(id);
-    };
-  }, []);
+  useFocusEffect(
+      useCallback(() => {
+        const id = setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
+        return () => {
+          clearTimeout(id);
+        };
+      }, []),
+  );
 
   const router = useRouter();
   const { setMarkers } = useMarkerContext();
@@ -162,6 +175,9 @@ const SearchPage = () => {
   }, [submitSearch]);
 
   const tabBarHeight = useBottomTabBarHeight();
+  const onClearPress = useCallback(() => {
+    setQuery('');
+  }, [setQuery]);
 
   return (
     <Center w='100%' bg='white'>
@@ -176,7 +192,8 @@ const SearchPage = () => {
             value={query}
             ref={inputRef}
             onChangeText={onQueryChange}
-            onBackPress={() => router.back()}
+            onBackPress={() => router.push('/map')}
+            onClearPress={onClearPress}
           />
         </Box>
         <FlatList
