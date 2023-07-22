@@ -67,8 +67,9 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isLoggedIn = async () => {
+  const isLoggedIn = useCallback(async () => {
     try {
+      setIsLoading(true);
       const lastUser = JSON.parse(await AsyncStorage.getItem('user'));
       if (lastUser) {
         const currentUser = await retrieveCurrentUser(lastUser.id);
@@ -79,7 +80,7 @@ export function AuthProvider({ children }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const login = async (email, password) => {
     try {
