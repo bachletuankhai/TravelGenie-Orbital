@@ -165,23 +165,29 @@ const ItineraryPage = () => {
   const [currentSelection, setCurrentSelection] = useState(0);
   const [loadingState, setLoadingState] = useState(loadingStates.done);
   const router = useRouter();
+  const store = useStore();
 
   const onHeaderItemPress = useCallback((id) => {
     setCurrentSelection(id);
   }, [setCurrentSelection]);
+
+  const onItineraryPress = useCallback((item) => {
+    store.setItem('CurrentItineraryId', item.id);
+    store.setItem('CurrentDateSelection', item.start_date);
+    router.push('itinerary/view/view');
+  }, [store, router]);
 
   const render = useCallback(({ item }) => {
     return (
       <ItineraryItemCard
         item={item}
         mb='3'
-        onPress={() => router.push(`/itinerary/view/${item.id}`)}
+        onPress={() => onItineraryPress(item)}
       />
     );
-  }, [router]);
+  }, [onItineraryPress]);
 
   const { user } = useAuthContext();
-  const store = useStore();
 
   const refreshData = useCallback(() => {
     setLoadingState(loadingStates.loading);
