@@ -10,10 +10,6 @@ import {
   Pressable,
   IconButton,
   HStack,
-  Icon,
-  Modal,
-  FlatList,
-  Radio,
   Select,
 } from "native-base";
 import { Alert, Platform, View } from "react-native";
