@@ -10,13 +10,13 @@ import {
   Pressable,
   FlatList,
 } from 'native-base';
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { DefaultMarker } from '../../assets/icons/map';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import axios from 'axios';
-import { useMarkerContext } from '../../contexts/mapMarkers';
+import { useStore } from '../../contexts/homeStore';
 
 const SearchBar = forwardRef(function SearchBar({ value, onChangeText, onBackPress, onClearPress }, ref) {
   return (
@@ -158,7 +158,11 @@ const SearchPage = () => {
   );
 
   const router = useRouter();
-  const { setMarkers } = useMarkerContext();
+  // const { setMarkers } = useMarkerContext();
+  const store = useStore();
+  const setMarkers = useCallback((markers) => {
+    store.setItem('MapMarkers', markers);
+  }, [store]);
 
   const submitSearch = useCallback((item) => {
     setMarkers([item]);

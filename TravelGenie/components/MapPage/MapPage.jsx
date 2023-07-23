@@ -21,7 +21,6 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { DefaultMarker } from '../../assets/icons/map';
 import { useRouter } from 'expo-router';
-import { useMarkerContext } from '../../contexts/mapMarkers';
 import { useStore } from '../../contexts/homeStore';
 
 
@@ -206,7 +205,13 @@ const MapPage = ({
     });
   }, [currentCoords]);
 
-  const { markers, setMarkers } = useMarkerContext();
+  const store = useStore();
+  const markers = useMemo(() => {
+    return store.getItem('MapMarkers');
+  }, [store]);
+  const setMarkers = useCallback((markers) => {
+    store.setItem('MapMarkers', markers);
+  }, [store]);
   const [currentSelection, setCurrentSelection] = useState(0);
   const selectedMarkersCoords = markers[currentSelection] ?
     [markers[currentSelection]?.lon, markers[currentSelection]?.lat] :
@@ -214,7 +219,6 @@ const MapPage = ({
 
   const centerCoords = centerCoordinate ||
     selectedMarkersCoords || currentCoords;
-  const store = useStore();
   const router = useRouter();
   const onAddPress = useCallback((item) => {
     store.setItem('NewPlanPlace', item);
@@ -238,8 +242,9 @@ const MapPage = ({
             height: "100%",
             width: '100%',
           }}
+          compassFadeWhenNorth={true}
           compassEnabled={true}
-          compassPosition={{ top: 200, right: 20 }}
+          compassPosition={{ top: 100, left: 20 }}
           scaleBarPosition={{ bottom: 8, right: 0 }}
         >
           <Camera
