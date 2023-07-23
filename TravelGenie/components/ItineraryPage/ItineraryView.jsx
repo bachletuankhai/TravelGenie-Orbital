@@ -31,8 +31,7 @@ import { useStore } from "../../contexts/homeStore";
 import { Feather } from '@expo/vector-icons';
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { useAuthContext } from "../../contexts/auth";
-
-// TODO: add api call to update info
+import axios from "axios";
 
 function toDateString(date) {
   const year = date.getFullYear();
@@ -245,7 +244,6 @@ function getFirstDayOfWeek(currentDate) {
   return firstDayOfWeek;
 }
 
-// TODO: add function to switch to specified day and extend the plan
 const HEADER_HEIGHT = 260;
 function Header({
   currentDateSelection, startDate, endDate, onDatePress, title,
@@ -369,7 +367,9 @@ function Header({
             data={weeksWithSelection}
             render={weekSelectRender}
             horizontal
-          /> */}
+          />
+          TODO: fix this flatlist
+          */}
         </VStack>}
       </VStack>
       <Box
@@ -411,7 +411,7 @@ function Header({
 
 // TODO: add day number view (day 1, day 2, etc)
 
-function LocationItemCard({ item }) {
+function LocationItemCard({ item, onViewInMapPress }) {
   // TODO: add edit function
   // TODO: add link to map view
   const startTimeArr = item.start_time.split(":");
@@ -489,6 +489,7 @@ function LocationItemCard({ item }) {
             color: '#212525',
           }}
           leftIcon={<LocationIcon size='md' color='#515979' />}
+          onPress={() => onViewInMapPress(item.place_id)}
         >
           View in map
         </Button>
@@ -688,6 +689,44 @@ export default function ItineraryView() {
     );
   }, [planDetail, user, store, router]);
 
+  const onViewInMapPress = useCallback((itemId) => {
+    if (!itemId) {
+      console.warn("item id not defined");
+      return;
+    }
+    axios.get(
+        "https://api.geoapify.com/v2/place-details",
+        {
+          params: {
+            lang: 'en',
+            apiKey: process.env.GEOAPIFY_API_KEY,
+            id: itemId,
+            features: "details",
+          },
+        },
+    )
+        .then((res) => res.data.features.map(((feature) => feature.properties)))
+        .then((res) => {
+          store.setItem('MapMarkers', res);
+          console.log(res);
+        })
+        .then((res) => {
+          router.push("/map");
+        })
+        .catch((err) => {
+          console.warn(err);
+        });
+  }, [store, router]);
+
+  const LocationCardRender = useCallback(({ item }) => {
+    return (
+      <LocationItemCard
+        item={item}
+        onViewInMapPress={() => onViewInMapPress(item.place_id)}
+      />
+    );
+  }, [onViewInMapPress]);
+
   return (
     <Center w="100%" flex='1' bg='white'>
       {loadingState == loadingStates.done && <Box w="100%" flex='1'>
@@ -703,7 +742,7 @@ export default function ItineraryView() {
         />
         <FlatList
           data={displayData}
-          renderItem={LocationItemCard}
+          renderItem={LocationCardRender}
           contentContainerStyle={{
             flexGrow: 0,
             paddingTop: HEADER_HEIGHT,
