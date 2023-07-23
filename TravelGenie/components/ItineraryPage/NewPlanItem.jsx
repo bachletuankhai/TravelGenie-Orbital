@@ -28,7 +28,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { createPlanItem, getItinerary } from "../../lib/itinerary";
 
 function TimePicker({
-  startTime, endTime, setStartTime, setEndTime,
+  startTime, endTime, setStartTime, setEndTime, isInvalid=false,
 }) {
   const handleTimeChange = useCallback((event, time, mode) => {
     if (event.type == "set") {
@@ -96,6 +96,14 @@ function TimePicker({
           }) || "End time"}
         </Button>
       </Button.Group>
+      {isInvalid && <Text
+        fontWeight='500'
+        color='error.500'
+        fontSize='xs'
+        left='2'
+      >
+        End time must be later than start time.
+      </Text>}
     </VStack>
   );
 }
@@ -318,11 +326,11 @@ function ChoosePlan({ value, setValue, data }) {
 
 const HEADER_HEIGHT = 50;
 export default function NewPlanItem() {
+  const store = useStore();
   const [name, setName] = useState('');
   const [subtitle, setSubtitle] = useState('');
 
-  const homeStore = useStore();
-  const currentSelectedPlace = homeStore.getItem('NewPlanPlace');
+  const currentSelectedPlace = store.getItem('NewPlanPlace');
 
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
@@ -337,7 +345,6 @@ export default function NewPlanItem() {
       [itineraryList, planId],
   );
 
-  const store = useStore();
   useFocusEffect(
       useCallback(() => {
         const itemId = store.getItem('CurrentItineraryId');
@@ -425,6 +432,9 @@ export default function NewPlanItem() {
     currentSelectedPlace,
   ]);
 
+  const isValidTime = startTime == null || endTime == null ||
+    startTime.getTime() < endTime.getTime();
+
   const setSelectItineraryValue = useCallback((value) => {
     setPlanId(value);
     if (value != planId) {
@@ -433,7 +443,7 @@ export default function NewPlanItem() {
   }, [planId, setPlanId, setCurrentDateSelection]);
 
 
-  const submitDisabled = !planId || !name || !subtitle ||
+  const submitDisabled = !isValidTime || !planId || !name || !subtitle ||
    !currentDateSelection || !startTime || !endTime || !currentSelectedPlace;
 
   const onAddDestinationPress = useCallback(() => {
@@ -493,6 +503,7 @@ export default function NewPlanItem() {
                 endDate={endDate || defaultDate}
               />
               <TimePicker
+                isInvalid={!isValidTime}
                 startTime={startTime}
                 endTime={endTime}
                 setEndTime={setEndTime}
