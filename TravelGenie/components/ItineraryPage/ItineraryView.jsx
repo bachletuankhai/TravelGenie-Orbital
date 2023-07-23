@@ -10,9 +10,13 @@ import {
   IconButton,
   Button,
   AddIcon,
+  Menu,
+  Icon,
 } from "native-base";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  Alert,
+  Platform,
   RefreshControl,
   View, useWindowDimensions,
 } from 'react-native';
@@ -20,8 +24,13 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { Entypo } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { LocationIcon } from "../../assets/icons/itinerary";
-import { getItinerary } from "../../lib/itinerary";
+import {
+  deleteItinerary, getItinerary, listItineraries,
+} from "../../lib/itinerary";
 import { useStore } from "../../contexts/homeStore";
+import { Feather } from '@expo/vector-icons';
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { useAuthContext } from "../../contexts/auth";
 
 // TODO: add api call to update info
 
@@ -98,9 +107,30 @@ function WeekCalendar({
   );
 }
 
+const menuItems = [
+  {
+    id: 0,
+    title: "Select date",
+    icon: <Feather name="calendar" />,
+    color: "black",
+  },
+  {
+    id: 1,
+    title: "Edit",
+    icon: <Feather name="edit" />,
+    color: "black",
+  },
+  {
+    id: 2,
+    title: "Delete",
+    icon: <Feather name="trash-2" />,
+    color: "red.500",
+  },
+];
+
 function Title({
   title, onBackPress, _title, _style, showBackButton=true,
-  onRightIconPress,
+  onSelectDatePress, onEditPress, onDeletePress,
 }) {
   const router = useRouter();
 
@@ -108,6 +138,28 @@ function Title({
   const defaultBack = useCallback(() => {
     router.back();
   }, [router]);
+
+  const pressHandlers = useMemo(() => {
+    return [
+      onSelectDatePress,
+      onEditPress,
+      onDeletePress,
+    ];
+  }, [onSelectDatePress, onEditPress, onDeletePress]);
+
+  const MenuTrigger = useCallback((triggerProps) => {
+    return (
+      <IconButton
+        icon={<Entypo name="dots-three-vertical" size={22} color='black' />}
+        size='md'
+        borderRadius='full'
+        _pressed={{
+          bg: 'gray.200',
+        }}
+        {...triggerProps}
+      />
+    );
+  }, []);
   return (
     <HStack
       w='100%' h='50px'
@@ -128,17 +180,44 @@ function Title({
         icon={<ArrowBackIcon color='#593131' />}
         onPress={onBackPress || defaultBack}
       />}
-      <IconButton
-        icon={<Entypo name="dots-three-vertical" size={24} color='black' />}
-        size='md'
+      <Box
         position='absolute'
+        borderRadius='full'
         right='4'
-        top='1'
-        onPress={onRightIconPress}
-        _pressed={{
-          bg: 'gray.200',
-        }}
-      />
+        top='0.5'
+      >
+        <Menu
+          placement="bottom left"
+          trigger={MenuTrigger}
+        >
+          {menuItems.map((item) => {
+            return (
+              <Menu.Item
+                key={item.id}
+                alignItems='flex-start'
+                justifyContent='flex-start'
+                py='0.5'
+                px='0'
+                onPress={pressHandlers[item.id]}
+              >
+                <HStack space={2}
+                  alignContent='center' alignItems='center' h='100%'
+                  my='2'
+                >
+                  <Icon as={item.icon} size='sm' color={item.color} />
+                  <Text
+                    fontSize='md'
+                    fontWeight='400'
+                    color={item.color}
+                  >
+                    {item.title}
+                  </Text>
+                </HStack>
+              </Menu.Item>
+            );
+          })}
+        </Menu>
+      </Box>
       <View pointerEvents='none'>
         <Text
           color='black'
@@ -167,9 +246,10 @@ function getFirstDayOfWeek(currentDate) {
 }
 
 // TODO: add function to switch to specified day and extend the plan
-const HEADER_HEIGHT = 230;
+const HEADER_HEIGHT = 260;
 function Header({
   currentDateSelection, startDate, endDate, onDatePress, title,
+  onSelectDatePress, onEditPress, onDeletePress,
 }) {
   // generate week range consisting start date and end date
   console.log(`current date: ${currentDateSelection}`);
@@ -201,7 +281,7 @@ function Header({
         key: index,
         dayOfWeek: weekdays[index],
         date: firstDay.getDate(),
-        isOutOfRange: time < startTime || endTime > endTime,
+        isOutOfRange: time < startTime || time > endTime,
         dateString: toDateString(firstDay),
       };
     }));
@@ -233,6 +313,24 @@ function Header({
   }, [onDatePress, width]);
 
   const calendarFlatListRef = useRef(null);
+  const weekSelectRender = useCallback(({ item, index }) => {
+    return (
+      <Button variant='ghost'
+        w='100px'
+        h='50px'
+        _text={{
+          fontWeight: 700,
+          color: "#515979",
+          fontSize: 'md',
+        }}
+        _pressed={{
+          bg: 'gray.200',
+        }}
+      >
+        {`Week ${index + 1}`}
+      </Button>
+    );
+  }, []);
 
   return (
     <Box
@@ -247,6 +345,9 @@ function Header({
       <VStack space={6}>
         <Title
           title={title}
+          onSelectDatePress={onSelectDatePress}
+          onEditPress={onEditPress}
+          onDeletePress={onDeletePress}
         />
         <Box alignItems='center' w='100%' zIndex={100}>
           <FlatList
@@ -259,6 +360,17 @@ function Header({
             initialNumToRender={2}
           />
         </Box>
+        {weeksWithSelection.length > 1 &&
+        <VStack borderTopWidth={1}
+          borderTopColor='#9BBAFB'
+          h='50px'
+        >
+          {/* <FlatList
+            data={weeksWithSelection}
+            render={weekSelectRender}
+            horizontal
+          /> */}
+        </VStack>}
       </VStack>
       <Box
         position='absolute'
@@ -439,6 +551,8 @@ export default function ItineraryView() {
   const [currentDateSelection, setCurrentDateSelection] =
     useState(null);
 
+  const { user } = useAuthContext();
+
   useFocusEffect(
       useCallback(() => {
         setLoadingState(loadingStates.loading);
@@ -513,6 +627,67 @@ export default function ItineraryView() {
         });
   }, [itemId, store]);
 
+  const openCalendar = useCallback(() => {
+    if (Platform.OS == 'android') {
+      DateTimePickerAndroid.open({
+        value: new Date(currentDateSelection),
+        onChange: (event, selectedDate) => {
+          if (event.type == "set") {
+            const currentDate = selectedDate;
+            setCurrentDateSelection(toDateString(currentDate));
+          };
+        },
+        mode: "date",
+        minimumDate: new Date(planDetail.start_date),
+        maximumDate: new Date(planDetail.end_date),
+      });
+    }
+  }, [currentDateSelection, planDetail]);
+
+  const onEditPress = useCallback(() => {
+    router.push('/edititinerary');
+  }, [router]);
+
+  const onDeletePress = useCallback(() => {
+    Alert.alert(
+        `Delete "${planDetail.name}"?`,
+        "Do you want to delete this itinerary? You cannot undo this.",
+        [
+          {
+            text: 'Cancel',
+            onPress: () => {},
+            style: 'cancel',
+          },
+          {
+            text: 'Delete',
+            onPress: () => {
+              setLoadingState(loadingStates.loading);
+              deleteItinerary(planDetail.id)
+                  .then((res) => {
+                    listItineraries(user?.id)
+                        .then((res) => {
+                          console.log(res);
+                          store.setItem('ItineraryList', res);
+                          router.back();
+                        })
+                        .catch((err) => {
+                          console.warn(err);
+                        });
+                  })
+                  .catch((err) => {
+                    console.warn(err);
+                  }).finally((res) => {
+                    setLoadingState(loadingStates.done);
+                  });
+            },
+          },
+        ],
+        {
+          cancelable: true,
+        },
+    );
+  }, [planDetail, user, store, router]);
+
   return (
     <Center w="100%" flex='1' bg='white'>
       {loadingState == loadingStates.done && <Box w="100%" flex='1'>
@@ -522,6 +697,9 @@ export default function ItineraryView() {
           startDate={planDetail?.start_date}
           endDate={planDetail?.end_date}
           onDatePress={onDatePress}
+          onSelectDatePress={openCalendar}
+          onEditPress={onEditPress}
+          onDeletePress={onDeletePress}
         />
         <FlatList
           data={displayData}
@@ -532,7 +710,6 @@ export default function ItineraryView() {
             paddingBottom: tabBarHeight + 10,
             paddingHorizontal: 28,
             height: '100%',
-            backgroundColor: "#edecca",
           }}
           refreshControl={<RefreshControl
             progressViewOffset={HEADER_HEIGHT}
