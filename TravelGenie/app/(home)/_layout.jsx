@@ -50,7 +50,7 @@ export default function HomeLayout() {
         tabBarShowLabel: false,
         headerShown: false,
         tabBarStyle: {
-          borderTopWidth: 0, // TODO: set to 0 when front end done
+          borderTopWidth: 0,
           height: 90,
           position: 'absolute',
         },
@@ -87,7 +87,7 @@ export default function HomeLayout() {
         <Tabs.Screen
           name="favorite"
           options={{
-            tabBarIcon: BookmarkIcon,
+            href: null,
           }}
         />
         <Tabs.Screen
