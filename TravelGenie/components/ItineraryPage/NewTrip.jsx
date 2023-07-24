@@ -19,7 +19,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthContext } from "../../contexts/auth";
-import { createItinerary } from "../../lib/itinerary";
+import { createItinerary, listItineraries } from "../../lib/itinerary";
 import { useRouter } from "expo-router";
 
 function CoverImage({ isPressed, src }) {
@@ -331,6 +331,7 @@ export default function NewTrip() {
               paddingTop: HEADER_HEIGHT + 20,
               paddingBottom: 10,
             }}
+            keyboardShouldPersistTaps='handled'
           >
             <VStack space='3' w='100%'>
               <CoverImageButton
