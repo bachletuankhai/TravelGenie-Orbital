@@ -19,8 +19,9 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthContext } from "../../contexts/auth";
-import { createItinerary, listItineraries } from "../../lib/itinerary";
-import { useRouter } from "expo-router";
+import { updateItinerary } from "../../lib/itinerary";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useStore } from "../../contexts/homeStore";
 
 function CoverImage({ isPressed, src }) {
   return (
@@ -234,6 +235,7 @@ function toDateString(date) {
 
 const HEADER_HEIGHT = 50;
 export default function NewTrip() {
+  const [planId, setPlanId] = useState(null);
   const [name, setName] = useState('');
   const [destination, setDestination] = useState('');
 
@@ -256,39 +258,44 @@ export default function NewTrip() {
   }, []);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const store = useStore();
 
   const submitDisabled = !fromDate || !toDate || !photoUrl || !name ||
    !destination;
   const { user } = useAuthContext();
   const submit = useCallback(() => {
     setIsLoading(true);
-    let imageLink = null;
-    const data = new FormData();
-    data.append('image', imageData);
-    data.append('name', "user-avatar-" + user.id);
-    fetch(process.env.IMAGE_UPLOAD_URL, {
-      method: 'post',
-      headers: {
-        Authorization: "Client-ID " + process.env.IMGUR_CLIENT_ID,
-      },
-      body: data,
-    }).then((res) => res.json()).then((res) => {
-      imageLink = res.data.link;
-      console.log(imageLink);
-      return imageLink;
-    }).then((link) => {
-      createItinerary(
-          user?.id,
+    let promise = new Promise(() => photoUrl);
+    if (imageData) {
+      let imageLink = null;
+      const data = new FormData();
+      data.append('image', imageData);
+      data.append('name', "user-avatar-" + user.id);
+      promise = fetch(process.env.IMAGE_UPLOAD_URL, {
+        method: 'post',
+        headers: {
+          Authorization: "Client-ID " + process.env.IMGUR_CLIENT_ID,
+        },
+        body: data,
+      }).then((res) => res.json()).then((res) => {
+        imageLink = res.data.link;
+        console.log(imageLink);
+        return imageLink;
+      });
+    }
+    promise.then((link) => {
+      updateItinerary(
+          planId,
           name,
           toDateString(fromDate),
           toDateString(toDate),
           destination,
           link,
       )
-          .then((res) => router.back())
+          .then((res) => router.push("/itinerary"))
           .catch((err) => {
-            console.log("CreateItinerary error " + err.message);
-            Alert.alert('Failed to create new trip',
+            console.log("EditItinerary error " + err.message);
+            Alert.alert('Failed to edit trip',
                 'An error has occured. Please try again.',
                 [{
                   text: 'OK',
@@ -310,7 +317,32 @@ export default function NewTrip() {
     }).finally(() => {
       setIsLoading(false);
     });
-  }, [user, name, fromDate, toDate, destination, router, imageData]);
+  }, [
+    planId,
+    store,
+    user,
+    name,
+    fromDate,
+    toDate,
+    destination,
+    router,
+    imageData,
+    photoUrl,
+  ]);
+
+  useFocusEffect(
+      useCallback(() => {
+        const itemId = store.getItem('CurrentItineraryId');
+        setPlanId(itemId);
+        const cachedPlanDetail = store.getItem('ItineraryList')
+            .filter((item) => item.id == itemId)[0];
+        setName(cachedPlanDetail.name);
+        setDestination(cachedPlanDetail.location);
+        setFromDate(new Date(cachedPlanDetail.start_date));
+        setToDate(new Date(cachedPlanDetail.end_date));
+        setPhotoUrl(cachedPlanDetail.photo_url);
+      }, [store]),
+  );
   return (
     <Center w='100%' bg='white'>
       <Box w='100%' safeArea>
@@ -323,7 +355,7 @@ export default function NewTrip() {
               bg: 'white',
               zIndex: 10,
             }}
-            title="Add trip"
+            title="Edit trip"
           />
           <ScrollView w='100%' h='100%'
             contentContainerStyle={{
@@ -362,9 +394,9 @@ export default function NewTrip() {
               />
               <BlueButton
                 isLoading={isLoading}
-                loadingText={'Create New Trip'}
+                loadingText={'Confirm'}
                 mt='35px'
-                title='Create New Trip'
+                title='Confirm'
                 isDisabled={submitDisabled}
                 onPress={submit}
               />

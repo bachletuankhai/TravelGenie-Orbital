@@ -24,22 +24,21 @@ export function LocationProvider({ children }) {
 
       try {
         // reverse geocoding to set address
-        // TODO: uncomment this
-        // const response = await axios.get(
-        //     `https://api.geoapify.com/v1/geocode/reverse`,
-        //     {
-        //       params: {
-        //         lat: location.coords.latitude,
-        //         lon: location.coords.longitude,
-        //         type: "city",
-        //         lang: 'en',
-        //         format: "json",
-        //         apiKey: process.env.GEOAPIFY_API_KEY,
-        //       },
-        //     },
-        // );
-        // // console.log(response.data?.results[0]);
-        // setAddress(response.data?.results[0]);
+        const response = await axios.get(
+            `https://api.geoapify.com/v1/geocode/reverse`,
+            {
+              params: {
+                lat: location.coords.latitude,
+                lon: location.coords.longitude,
+                type: "city",
+                lang: 'en',
+                format: "json",
+                apiKey: process.env.GEOAPIFY_API_KEY,
+              },
+            },
+        );
+        // console.log(response.data?.results[0]);
+        setAddress(response.data?.results[0]);
       } catch (error) {
         console.log(error);
       }

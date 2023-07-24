@@ -27,6 +27,7 @@ import {
 } from '@expo-google-fonts/poppins';
 import { AuthProvider } from '../contexts/auth';
 import { FirstLaunchProvider } from '../contexts/firstLaunch';
+import { StoreProvider } from '../contexts/homeStore';
 
 const fontConfig = {
   Poppins: {
@@ -176,13 +177,15 @@ export default function AppLayout() {
   return (
     <FirstLaunchProvider>
       <AuthProvider>
-        <NativeBaseProvider theme={theme}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          />
-        </NativeBaseProvider>
+        <StoreProvider>
+          <NativeBaseProvider theme={theme}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+              }}
+            />
+          </NativeBaseProvider>
+        </StoreProvider>
       </AuthProvider>
     </FirstLaunchProvider>
   );

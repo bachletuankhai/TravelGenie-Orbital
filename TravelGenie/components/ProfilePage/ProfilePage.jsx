@@ -81,13 +81,13 @@ const sections = [
     iconLeft: PersonalInfoIcon,
     href: '/profile/personalInfo',
   },
-  {
-    id: 2,
-    type: "Button",
-    title: "Payment Information",
-    iconLeft: PaymentInfoIcon,
-    href: null,
-  },
+  // {
+  //   id: 2,
+  //   type: "Button",
+  //   title: "Payment Information",
+  //   iconLeft: PaymentInfoIcon,
+  //   href: null,
+  // },
   {
     id: 3,
     type: "Button",

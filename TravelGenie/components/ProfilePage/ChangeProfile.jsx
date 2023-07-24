@@ -305,6 +305,7 @@ const ChangeProfilePage = () => {
               justifyContent: 'space-between',
               flexDirection: 'column',
             }}
+            keyboardShouldPersistTaps='handled'
           >
             <VStack px='30px' space='3.5' alignItems='center'>
               <Avatar src={imageUrl} onCameraPress={imagePickingAsync} />

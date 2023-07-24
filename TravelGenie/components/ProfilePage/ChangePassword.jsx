@@ -164,6 +164,7 @@ export default function ChangePassword() {
               justifyContent: 'space-between',
               flexDirection: 'column',
             }}
+            keyboardShouldPersistTaps='handled'
           >
             <TitleHeader title='Change Password'
               onBackPress={() => router.back()}/>
