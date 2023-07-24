@@ -146,20 +146,21 @@ export default function DeleteAccount() {
   return (
     <Center w="100%" bgColor='white'>
       <Box safeArea w="100%" maxW='420'>
-        <KeyboardAvoidingView behavior='padding'>
+        <KeyboardAvoidingView behavior='height'>
           <ScrollView w="100%" h="100%"
             _contentContainerStyle={{
               flexGrow: 1,
               justifyContent: 'space-between',
               flexDirection: 'column',
             }}
+            keyboardShouldPersistTaps='handled'
           >
             <TitleHeader title='Delete Account'
               onBackPress={() => router.back()}/>
             <VStack flex='1' space={3} mt="40px" px="30px">
               <Password
                 value={oldPassword}
-                title={"Enter Old Password"}
+                title={"Enter Password"}
                 onChangeText={setOldPassword}
                 isShown={oldPasswordShow}
                 setShow={() => setOldPasswordShow(!oldPasswordShow)}
