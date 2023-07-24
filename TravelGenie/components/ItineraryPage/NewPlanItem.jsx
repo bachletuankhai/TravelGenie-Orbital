@@ -21,7 +21,10 @@ import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { useStore } from "../../contexts/homeStore";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
-import { createPlanItem, getItinerary } from "../../lib/itinerary";
+import {
+  createPlanItem, getItinerary, listItineraries,
+} from "../../lib/itinerary";
+import { useAuthContext } from "../../contexts/auth";
 
 function TimePicker({
   startTime, endTime, setStartTime, setEndTime, isInvalid=false,
@@ -104,7 +107,7 @@ function TimePicker({
   );
 }
 
-function DatePicker({ value, setValue, startDate, endDate }) {
+function DatePicker({ value, setValue, startDate, endDate, isDisabled }) {
   const handleDateChangeAndroid = useCallback((event, selectedDate) => {
     if (event.type == "set") {
       const currentDate = selectedDate;
@@ -137,6 +140,7 @@ function DatePicker({ value, setValue, startDate, endDate }) {
         Date
       </Text>
       <Button
+        isDisabled={isDisabled}
         variant='outline'
         h='50px'
         borderRadius='48'
@@ -337,25 +341,38 @@ export default function NewPlanItem() {
 
   const [itineraryList, setItineraryList] = useState([]);
   const planDetail = useMemo(
-      () => itineraryList.filter((item) => item.id == planId)[0],
+      () => itineraryList ?
+        itineraryList.filter((item) => item.id == planId)[0] : null,
       [itineraryList, planId],
   );
+  const { user } = useAuthContext();
 
   useFocusEffect(
       useCallback(() => {
+        let list = store.getItem('ItineraryList');
+        if (!list) {
+          listItineraries(user?.id)
+              .then((res) => {
+                console.log(res);
+                store.setItem('ItineraryList', res);
+                list = res;
+              })
+              .catch((err) => {
+                console.warn(err);
+              });
+        }
         const itemId = store.getItem('CurrentItineraryId');
-        setPlanId(itemId);
-        const list = store.getItem('ItineraryList');
-        setItineraryList(list);
         const currentDateSelection = store.getItem('CurrentDateSelection');
         setCurrentDateSelection(new Date(currentDateSelection));
-      }, [store]),
+        setPlanId(itemId);
+        setItineraryList(list);
+      }, [store, user]),
   );
 
   const startDate = planDetail?.start_date;
   const endDate = planDetail?.end_date;
 
-  const defaultDate = "1-1-2020";
+  const defaultDate = undefined;
 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -467,6 +484,7 @@ export default function NewPlanItem() {
               paddingTop: HEADER_HEIGHT + 20,
               paddingBottom: 10,
             }}
+            keyboardShouldPersistTaps='handled'
           >
             <VStack space='3' w='100%'>
               {currentSelectedPlace ?
@@ -490,9 +508,10 @@ export default function NewPlanItem() {
               <ChoosePlan
                 value={planId}
                 setValue={setSelectItineraryValue}
-                data={itineraryList}
+                data={itineraryList || []}
               />
               <DatePicker
+                isDisabled={!startDate || !endDate}
                 value={currentDateSelection}
                 setValue={setCurrentDateSelection}
                 startDate={startDate || defaultDate}
