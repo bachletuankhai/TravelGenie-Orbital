@@ -355,7 +355,7 @@ export default function NewTrip() {
               bg: 'white',
               zIndex: 10,
             }}
-            title="Add trip"
+            title="Edit trip"
           />
           <ScrollView w='100%' h='100%'
             contentContainerStyle={{
@@ -363,6 +363,7 @@ export default function NewTrip() {
               paddingTop: HEADER_HEIGHT + 20,
               paddingBottom: 10,
             }}
+            keyboardShouldPersistTaps='handled'
           >
             <VStack space='3' w='100%'>
               <CoverImageButton
