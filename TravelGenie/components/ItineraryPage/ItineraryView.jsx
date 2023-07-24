@@ -25,7 +25,7 @@ import { Entypo } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { LocationIcon } from "../../assets/icons/itinerary";
 import {
-  deleteItinerary, getItinerary, listItineraries,
+  deleteItinerary, deletePlanItem, getItinerary, listItineraries,
 } from "../../lib/itinerary";
 import { useStore } from "../../contexts/homeStore";
 import { Feather } from '@expo/vector-icons';
@@ -133,7 +133,6 @@ function Title({
 }) {
   const router = useRouter();
 
-  // TODO: add functionality to the menu bar
   const defaultBack = useCallback(() => {
     router.back();
   }, [router]);
@@ -411,13 +410,29 @@ function Header({
 
 // TODO: add day number view (day 1, day 2, etc)
 
-function LocationItemCard({ item, onViewInMapPress }) {
+function LocationItemCard({ item, onViewInMapPress, onDeleteItem }) {
   // TODO: add edit function
-  // TODO: add link to map view
   const startTimeArr = item.start_time.split(":");
   const startTime = `${startTimeArr[0]}:${startTimeArr[1]}`;
   const endTimeArr = item.end_time.split(":");
   const endTime = `${endTimeArr[0]}:${endTimeArr[1]}`;
+  const MenuTrigger = useCallback((triggerProps) => {
+    return (
+      <IconButton
+        icon={<Entypo name="dots-three-vertical" size={20} color="black" />}
+        size='sm'
+        borderRadius='full'
+        _pressed={{
+          bg: 'gray.200',
+        }}
+        {...triggerProps}
+      />
+    );
+  }, []);
+  const onDeletePress = useCallback(() => {
+    console.log("delete");
+    onDeleteItem(item.id);
+  }, [onDeleteItem, item]);
   return (
     <HStack h='120px' w='100%'>
       <Box
@@ -493,7 +508,43 @@ function LocationItemCard({ item, onViewInMapPress }) {
         >
           View in map
         </Button>
-        <IconButton
+        <Box
+          position='absolute'
+          borderRadius='full'
+          top='1.5'
+          right='1'
+        >
+          <Menu
+            placement="bottom left"
+            trigger={MenuTrigger}
+          >
+            <Menu.Item
+              alignItems='flex-start'
+              justifyContent='flex-start'
+              py='0.5'
+              px='0'
+              onPress={onDeletePress}
+            >
+              <HStack space={2}
+                alignContent='center' alignItems='center' h='100%'
+                my='2'
+              >
+                <Icon
+                  as={<Feather name='trash-2' />}
+                  size='sm' color='error.500'
+                />
+                <Text
+                  fontSize='md'
+                  fontWeight='400'
+                  color='error.500'
+                >
+                  Delete
+                </Text>
+              </HStack>
+            </Menu.Item>
+          </Menu>
+        </Box>
+        {/* <IconButton
           position='absolute'
           top='1.5'
           right='1'
@@ -503,7 +554,7 @@ function LocationItemCard({ item, onViewInMapPress }) {
           _pressed={{
             bg: 'gray.200',
           }}
-        />
+        /> */}
       </Box>
     </HStack>
   );
@@ -538,6 +589,7 @@ function AddButton({ onPress, ...props }) {
 const loadingStates = {
   done: 0,
   loading: 1,
+  refreshing: 2,
   error: -1,
 };
 export default function ItineraryView() {
@@ -610,7 +662,7 @@ export default function ItineraryView() {
     item.date == currentDateSelection);
 
   const refreshData = useCallback(() => {
-    setLoadingState(loadingStates.loading);
+    setLoadingState(loadingStates.refreshing);
     getItinerary(itemId)
         .then((res) => res.data)
         .then((res) => {
@@ -718,18 +770,33 @@ export default function ItineraryView() {
         });
   }, [store, router]);
 
+  const onDeleteItem = useCallback((deleteItemId) => {
+    // call api to delete item
+    deletePlanItem(deleteItemId)
+        .catch((err) => {
+          console.warn(err);
+        });
+    // update the global store and ui, only sync when refresh
+    const updatedData = realData.filter((item) => item.id != deleteItemId);
+    setRealData(updatedData);
+    store.setItem(`Itinerary-${itemId}-Items`, updatedData);
+  }, [realData, store, itemId]);
+
   const LocationCardRender = useCallback(({ item }) => {
     return (
       <LocationItemCard
         item={item}
         onViewInMapPress={() => onViewInMapPress(item.place_id)}
+        onDeleteItem={onDeleteItem}
       />
     );
-  }, [onViewInMapPress]);
+  }, [onViewInMapPress, onDeleteItem]);
 
   return (
     <Center w="100%" flex='1' bg='white'>
-      {loadingState == loadingStates.done && <Box w="100%" flex='1'>
+      {loadingState != loadingStates.loading &&
+        loadingState != loadingStates.error &&
+      <Box w="100%" flex='1'>
         <Header
           title={planDetail?.name || "Itinerary"}
           currentDateSelection={currentDateSelection}
@@ -751,8 +818,8 @@ export default function ItineraryView() {
             height: '100%',
           }}
           refreshControl={<RefreshControl
-            progressViewOffset={HEADER_HEIGHT}
-            refreshing={loadingState == loadingStates.loading}
+            progressViewOffset={HEADER_HEIGHT - 20}
+            refreshing={loadingState == loadingStates.refreshing}
             onRefresh={refreshData}
           />}
         />

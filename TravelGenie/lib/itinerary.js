@@ -257,3 +257,44 @@ export async function deleteItinerary(id) {
     return { error };
   }
 }
+
+export async function deletePlanItem(id) {
+  const api = "/itinerary/items";
+  console.log(api);
+  try {
+    const res = await axios.delete(
+        api,
+        {
+          headers: {
+            'x-api-key': process.env.BACKEND_API_KEY,
+          },
+          params: {
+            'id': id,
+          },
+          timeout: 10000,
+          timeoutErrorMessage: "Network Error",
+        });
+    if (res.data.error) {
+      throw new Error(error);
+    } else {
+      return res.data;
+    }
+  } catch (error) {
+    console.log(`deletePlanItem error: ${error}`);
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+      return error.response.data;
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', error.message);
+    }
+    return { error };
+  }
+}
