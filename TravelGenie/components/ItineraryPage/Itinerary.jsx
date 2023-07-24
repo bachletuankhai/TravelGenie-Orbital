@@ -34,9 +34,6 @@ const sections = [
   },
 ];
 
-// TODO: set api call to get data and organize data
-// into corresponding category
-
 const HEADER_HEIGHT = 100;
 
 function Header({ currentSelection, onItemPress }) {
