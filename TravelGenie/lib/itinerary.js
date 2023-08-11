@@ -1,6 +1,5 @@
 import axios from "axios";
 axios.defaults.baseURL = process.env.BACKEND_URL;
-// axios.defaults.baseURL = "http://192.168.1.8:3000";
 
 export async function listItineraries(userId) {
   if (!userId) {
