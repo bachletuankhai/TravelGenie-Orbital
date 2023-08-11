@@ -1,6 +1,5 @@
 import axios from "axios";
 axios.defaults.baseURL = process.env.BACKEND_URL;
-// axios.defaults.baseURL = "http://192.168.1.8:3000";
 const apiKey = process.env.BACKEND_API_KEY;
 
 export async function handleLogin(email, password) {
